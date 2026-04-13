@@ -1,4 +1,6 @@
-use crate::{bitmap::Bitmap, pixel::Pixel};
+use std::usize;
+
+use crate::{bitmap::Bitmap, pixel::Pixel, vertex::Vertex};
 
 pub struct RenderCtx {
     scan_buffer: Vec<[usize; 2]>,
@@ -15,7 +17,7 @@ impl RenderCtx {
         }
     }
 
-    pub fn draw_scan_buffer(&mut self, y: usize,  x_min: usize, x_max: usize) {
+    pub fn draw_scan_buffer(&mut self, y: usize, x_min: usize, x_max: usize) {
         self.scan_buffer[y] = [x_min, x_max];
     }
 
@@ -26,5 +28,40 @@ impl RenderCtx {
                 bitmap.draw_pixel(x, y, Pixel::WHITE);
             }
         }
+    }
+
+    fn scan_convert_line(&mut self, min_y_vert: Vertex, max_y_vert: Vertex, side: usize) {
+        println!("converting {}", side);
+        let y_start = min_y_vert.y as i32;
+        let y_end = max_y_vert.y as i32;
+        let x_start = min_y_vert.x as i32;
+        let x_end = max_y_vert.x as i32;
+
+        let y_dist = y_end - y_start;
+        let x_dist = x_end - x_start;
+
+        if y_dist <= 0 {
+            return;
+        }
+
+        let x_step = x_dist as f32 / y_dist as f32;
+        let mut x_cur = x_start as f32;
+
+        for y in y_start..y_end {
+            self.scan_buffer[y as usize][side] = x_cur as usize;
+            x_cur += x_step;
+        }
+    }
+
+    pub fn scan_convert_tri(
+        &mut self,
+        min_y_vert: Vertex,
+        mid_y_vert: Vertex,
+        max_y_vert: Vertex,
+        handedness: i32,
+    ) {
+        self.scan_convert_line(min_y_vert, max_y_vert, (0 + handedness) as usize);
+        self.scan_convert_line(min_y_vert, mid_y_vert, (1 - handedness) as usize);
+        self.scan_convert_line(mid_y_vert, max_y_vert, (1 - handedness) as usize);
     }
 }
