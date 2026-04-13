@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 derive-new = "0.7.0"
 fltk = "1.5.22"
+rand = "0.10.1"

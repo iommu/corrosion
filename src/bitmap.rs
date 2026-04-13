@@ -24,7 +24,7 @@ impl Bitmap {
     }
 
     pub fn draw_pixel(&mut self, x: usize, y: usize, pixel: Pixel) {
-        self.components[x * self.size[0] + y]
+        self.components[y * self.size[0] + x]
             .copy_from_slice(&[pixel.r, pixel.g, pixel.b, pixel.a]);
     }
 
@@ -35,5 +35,13 @@ impl Bitmap {
                 self.components.len() * 4,
             )
         }
+    }
+
+    pub fn width(&self) -> usize {
+        self.size[0]
+    }
+
+    pub fn height(&self) -> usize {
+        self.size[1]
     }
 }
