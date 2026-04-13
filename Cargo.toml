@@ -5,4 +5,4 @@ edition = "2024"
 
 [dependencies]
 derive-new = "0.7.0"
-eframe = "0.34.1"
+fltk = "1.5.22"

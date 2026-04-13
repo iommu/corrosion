@@ -1,57 +1,62 @@
-use eframe::{self, egui};
+use fltk::{
+    app::{self, App},
+    frame::Frame,
+    image::RgbImage,
+    prelude::*,
+    window::{DoubleWindow, Window},
+};
 
-pub struct Display {}
+use crate::bitmap::Bitmap;
+pub struct Display {
+    pub size: [usize; 2],
+    pub bitmap: Bitmap,
+    app: App,
+    window: DoubleWindow,
+    frame: Frame,
+}
 
 impl Display {
-    pub fn new(height: f32, width: f32, title: String) -> Self {
-        let native_options = eframe::NativeOptions {
-            viewport: egui::ViewportBuilder::default()
-                .with_inner_size([width, height])
-                .with_resizable(false),
-            ..Default::default()
+    pub fn new(size: [usize; 2], title: String) -> Self {
+        let width = size[0] as i32;
+        let height = size[1] as i32;
+        let bitmap = Bitmap::new(size);
+        let mut obj = Self {
+            size,
+            bitmap,
+            app: app::App::default(),
+            window: Window::default()
+                .with_size(width, height)
+                .with_label(&title),
+            // Note : frame + 19 or there's a weird grey bar for some unknown reason
+            frame: Frame::new(0, 0, width, height + 19, ""),
         };
 
-        let _ = eframe::run_native(
-            title.as_str(),
-            native_options,
-            Box::new(|cc| Ok(Box::new(Window::new(cc)))),
-        );
-
-        Display {}
+        return obj;
     }
-}
 
-pub struct Window;
-
-impl Window {
-    fn new(_cc: &eframe::CreationContext<'_>) -> Self {
-        Self {}
+    pub fn start(&mut self) {
+        self.window.show();
+        self.app.wait();
     }
-}
 
-impl eframe::App for Window {
-    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
-        egui::Panel::top("top_panel").show_inside(ui, |ui| {
-            egui::MenuBar::new().ui(ui, |ui| {
-                // NOTE: no File->Quit on web pages!
-                let is_web = cfg!(target_arch = "wasm32");
-                if !is_web {
-                    ui.menu_button("File", |ui| {
-                        if ui.button("Quit").clicked() {
-                            ui.send_viewport_cmd(egui::ViewportCommand::Close);
-                        }
-                    });
-                    ui.add_space(16.0);
-                }
+    pub fn run(&mut self) -> bool {
+        return self.app.wait();
+    }
 
-                egui::widgets::global_theme_preference_buttons(ui);
-            });
-        });
+    pub fn stop(&mut self) {
+        self.app.quit();
+    }
 
-        egui::CentralPanel::default().show_inside(ui, |ui| {
-            ui.heading("eframe template");
+    pub fn update(&mut self) {
+        let mut image = RgbImage::new(
+            &self.bitmap.get_buffer(),
+            self.size[0] as i32,
+            self.size[1] as i32,
+            fltk::enums::ColorDepth::Rgba8,
+        )
+        .unwrap();
 
-            ui.separator();
-        });
+        self.frame.set_image(Some(image));
+        self.window.redraw();
     }
 }

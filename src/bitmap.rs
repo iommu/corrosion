@@ -3,25 +3,37 @@
 use crate::pixel::Pixel;
 
 pub struct Bitmap {
-    width: usize,
-    height: usize,
-    components: Vec<Pixel>,
+    size: [usize; 2],
+    components: Vec<[u8; 4]>,
 }
 
 impl Bitmap {
-    pub fn new(width: usize, height: usize) -> Self {
+    pub fn new(size: [usize; 2]) -> Self {
         Self {
-            width,
-            height,
-            components: vec![Pixel::default(); width * height],
+            size,
+            components: vec![[0, 0, 0, 255]; size[0] * size[1] * 4],
         }
     }
 
-    pub fn clear(&mut self, shade: u8) {
-        self.components.fill(Pixel::new(shade, shade, shade, shade));
+    pub fn fill_pixel(&mut self, pixel: Pixel) {
+        self.components.fill([pixel.r, pixel.g, pixel.b, pixel.a]);
+    }
+
+    pub fn fill(&mut self, shade: u8) {
+        self.components.fill([shade, shade, shade, shade]);
     }
 
     pub fn draw_pixel(&mut self, x: usize, y: usize, pixel: Pixel) {
-        self.components[x * self.width + y] = pixel;
+        self.components[x * self.size[0] + y]
+            .copy_from_slice(&[pixel.r, pixel.g, pixel.b, pixel.a]);
+    }
+
+    pub fn get_buffer(&mut self) -> &[u8] {
+        unsafe {
+            std::slice::from_raw_parts(
+                self.components.as_ptr() as *const u8,
+                self.components.len() * 4,
+            )
+        }
     }
 }

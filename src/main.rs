@@ -1,7 +1,15 @@
-mod display;
+use crate::pixel::Pixel;
+
 mod bitmap;
+mod display;
 mod pixel;
 fn main() {
-    println!("Hello, world!");
-    display::Display::new(400.0, 400.0, "hello".to_owned());
+    let mut disp = display::Display::new([800, 600], "Software rendering".to_owned());
+    disp.start();
+    disp.bitmap.fill(0x80);
+    disp.bitmap.draw_pixel(100, 100, Pixel::new(255, 0, 0, 255));
+    while disp.run() {
+        disp.update();
+    }
+    disp.stop();
 }
