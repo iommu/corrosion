@@ -1,4 +1,4 @@
-use std::usize;
+use std::{mem::swap, usize};
 
 use crate::{bitmap::Bitmap, pixel::Pixel, vertex::Vertex};
 
@@ -31,7 +31,6 @@ impl RenderCtx {
     }
 
     fn scan_convert_line(&mut self, min_y_vert: Vertex, max_y_vert: Vertex, side: usize) {
-        println!("converting {}", side);
         let y_start = min_y_vert.y as i32;
         let y_end = max_y_vert.y as i32;
         let x_start = min_y_vert.x as i32;
@@ -63,5 +62,33 @@ impl RenderCtx {
         self.scan_convert_line(min_y_vert, max_y_vert, (0 + handedness) as usize);
         self.scan_convert_line(min_y_vert, mid_y_vert, (1 - handedness) as usize);
         self.scan_convert_line(mid_y_vert, max_y_vert, (1 - handedness) as usize);
+    }
+
+    pub fn fill_tri(&mut self, bitmap: &mut Bitmap, mut vert_1: Vertex, mut vert_2: Vertex, mut vert_3: Vertex) {
+        let min_y_vert = &mut vert_1;
+        let mid_y_vert = &mut vert_2;
+        let max_y_vert = &mut vert_3;
+
+        if max_y_vert.y < mid_y_vert.y {
+            swap(max_y_vert, mid_y_vert);
+        }
+
+        if mid_y_vert.y < min_y_vert.y {
+            swap(mid_y_vert, min_y_vert);
+        }
+
+        if max_y_vert.y < mid_y_vert.y {
+            swap(max_y_vert, mid_y_vert);
+        }
+
+        let area: f32 = min_y_vert.tri_area(max_y_vert, mid_y_vert);
+        let handedness = if area >= 0.0 {
+            1
+        } else {
+            0
+        };
+
+        self.scan_convert_tri(*min_y_vert, *mid_y_vert, *max_y_vert, handedness);
+        self.fill_shape(bitmap, min_y_vert.y as usize, max_y_vert.y as usize);
     }
 }

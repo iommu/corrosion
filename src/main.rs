@@ -32,10 +32,10 @@ fn main() {
         //     rctx.draw_scan_buffer(j, 300-j, 300+j);
         // }
 
-        rctx.scan_convert_tri(min_y_vert, mid_y_vert, max_y_vert, 0);
+        // rctx.scan_convert_tri(min_y_vert, mid_y_vert, max_y_vert, 0);
 
-        rctx.fill_shape(&mut disp.bitmap, 100, 300);
-        println!("done");
+        // rctx.fill_shape(&mut disp.bitmap, 100, 300);
+        rctx.fill_tri(&mut disp.bitmap, min_y_vert, mid_y_vert, max_y_vert);
 
         // stars.update_and_render(&mut disp.bitmap, delta);
         disp.update();
