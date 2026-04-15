@@ -31,10 +31,10 @@ impl RenderCtx {
     }
 
     fn scan_convert_line(&mut self, min_y_vert: Vertex, max_y_vert: Vertex, side: usize) {
-        let y_start = min_y_vert.y as i32;
-        let y_end = max_y_vert.y as i32;
-        let x_start = min_y_vert.x as i32;
-        let x_end = max_y_vert.x as i32;
+        let y_start = min_y_vert.y() as i32;
+        let y_end = max_y_vert.y() as i32;
+        let x_start = min_y_vert.x() as i32;
+        let x_end = max_y_vert.x() as i32;
 
         let y_dist = y_end - y_start;
         let x_dist = x_end - x_start;
@@ -69,15 +69,15 @@ impl RenderCtx {
         let mid_y_vert = &mut vert_2;
         let max_y_vert = &mut vert_3;
 
-        if max_y_vert.y < mid_y_vert.y {
+        if max_y_vert.y() < mid_y_vert.y() {
             swap(max_y_vert, mid_y_vert);
         }
 
-        if mid_y_vert.y < min_y_vert.y {
+        if mid_y_vert.y() < min_y_vert.y() {
             swap(mid_y_vert, min_y_vert);
         }
 
-        if max_y_vert.y < mid_y_vert.y {
+        if max_y_vert.y() < mid_y_vert.y() {
             swap(max_y_vert, mid_y_vert);
         }
 
@@ -89,6 +89,6 @@ impl RenderCtx {
         };
 
         self.scan_convert_tri(*min_y_vert, *mid_y_vert, *max_y_vert, handedness);
-        self.fill_shape(bitmap, min_y_vert.y as usize, max_y_vert.y as usize);
+        self.fill_shape(bitmap, min_y_vert.y() as usize, max_y_vert.y() as usize);
     }
 }

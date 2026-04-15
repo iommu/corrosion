@@ -10,6 +10,8 @@ mod pixel;
 mod render_ctx;
 mod stars3D;
 mod vertex;
+mod matrix;
+mod vector;
 
 fn main() {
     let mut start = Instant::now();
