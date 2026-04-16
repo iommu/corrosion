@@ -1,6 +1,6 @@
 use std::{mem::swap, usize};
 
-use crate::{bitmap::Bitmap, pixel::Pixel, vertex::Vertex};
+use crate::{bitmap::Bitmap, matrix::Matrix4F, pixel::Pixel, vertex::Vertex};
 
 pub struct RenderCtx {
     scan_buffer: Vec<[usize; 2]>,
@@ -65,9 +65,10 @@ impl RenderCtx {
     }
 
     pub fn fill_tri(&mut self, bitmap: &mut Bitmap, mut vert_1: Vertex, mut vert_2: Vertex, mut vert_3: Vertex) {
-        let min_y_vert = &mut vert_1;
-        let mid_y_vert = &mut vert_2;
-        let max_y_vert = &mut vert_3;
+        let ss_transform = Matrix4F::new_ss_transform(bitmap.width() as f32 /2.0, bitmap.height() as f32 / 2.0);
+        let min_y_vert = &mut vert_1.transform(ss_transform).perspective_div();
+        let mid_y_vert = &mut vert_2.transform(ss_transform).perspective_div();
+        let max_y_vert = &mut vert_3.transform(ss_transform).perspective_div();
 
         if max_y_vert.y() < mid_y_vert.y() {
             swap(max_y_vert, mid_y_vert);

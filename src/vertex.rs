@@ -6,9 +6,9 @@ pub struct Vertex {
 }
 
 impl Vertex {
-    pub fn new(x: f32, y: f32) -> Self {
+    pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self {
-            pos: Vector4F::new(x, y, 0.0, 1.0),
+            pos: Vector4F::new(x, y, z, 1.0),
         }
     }
 
@@ -28,9 +28,28 @@ impl Vertex {
         self.pos.y_mut()
     }
 
-    pub fn new_tranfrom(&self, transform: Matrix4F) -> Vertex {
+    pub fn z(&self) -> f32 {
+        self.pos.z()
+    }
+
+    pub fn z_mut(&mut self) -> &mut f32 {
+        self.pos.z_mut()
+    }
+
+    pub fn transform(&self, transform: Matrix4F) -> Vertex {
         Vertex {
             pos: transform.transform(self.pos),
+        }
+    }
+
+    pub fn perspective_div(&self) -> Self {
+        Self {
+            pos: Vector4F::new(
+                self.pos.x() / self.pos.w(),
+                self.pos.y() / self.pos.w(),
+                self.pos.z() / self.pos.w(),
+                self.pos.w(), // sneaky storage
+            ),
         }
     }
 

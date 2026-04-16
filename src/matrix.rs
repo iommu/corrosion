@@ -70,7 +70,7 @@ impl Matrix4F {
     }
 
     pub fn new_rotation(x: f32, y: f32, z: f32) -> Self {
-        let r_x = Matrix4F {
+        let r_z = Matrix4F {
             mat: [
                 [z.cos(), -(z.sin()), 0.0, 0.0],
                 [z.sin(), z.cos(), 0.0, 0.0],
@@ -78,7 +78,7 @@ impl Matrix4F {
                 [0.0, 0.0, 0.0, 1.0],
             ],
         };
-        let r_y = Matrix4F {
+        let r_x = Matrix4F {
             mat: [
                 [1.0, 0.0, 0.0, 0.0],
                 [0.0, x.cos(), -(x.sin()), 0.0],
@@ -86,7 +86,7 @@ impl Matrix4F {
                 [0.0, 0.0, 0.0, 1.0],
             ],
         };
-        let r_z = Matrix4F {
+        let r_y = Matrix4F {
             mat: [
                 [y.cos(), 0.0, -(y.sin()), 0.0],
                 [0.0, 1.0, 0.0, 0.0],
@@ -95,7 +95,7 @@ impl Matrix4F {
             ],
         };
 
-        r_z * (r_y * r_x)
+        r_z.mul(r_y.mul(r_x))
     }
 
     pub fn transform(&self, rhs: Vector4F) -> Vector4F {
@@ -130,16 +130,24 @@ impl Matrix4F {
         }
     }
 
-    // pub fn new_perspective(fov : f32, aspect_ratio : f32, z_near : f32, z_far : f32) -> Self {
-    //     Self {
-    //         mat: [
-    //             [1.0, 0.0, 0.0, 0.0],
-    //             [0.0, 1.0, 0.0, 0.0],
-    //             [0.0, 0.0, 1.0, 0.0],
-    //             [0.0, 0.0, 0.0, 1.0],
-    //         ],
-    //     }
-    // }
+    pub fn new_perspective(fov: f32, aspect_ratio: f32, z_near: f32, z_far: f32) -> Self {
+        let tan_half_fov = (fov / 2.0).tan();
+        let z_range = z_near - z_far;
+
+        Self {
+            mat: [
+                [1.0 / (tan_half_fov * aspect_ratio), 0.0, 0.0, 0.0],
+                [0.0, 1.0 / tan_half_fov, 0.0, 0.0],
+                [
+                    0.0,
+                    0.0,
+                    (-z_near - z_far) / z_range,
+                    (2.0 * z_far * z_near) / z_range,
+                ],
+                [0.0, 0.0, 1.0, 0.0],
+            ],
+        }
+    }
 
     //  pub fn new_rotation_from_nrml(fov : f32, aspect_ratio : f32, z_near : f32, z_far : f32) -> Self {
     //     Self {
