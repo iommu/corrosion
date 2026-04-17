@@ -13,6 +13,7 @@ mod render_ctx;
 mod stars3D;
 mod vector;
 mod vertex;
+mod edge;
 
 fn main() {
     let mut start = Instant::now();
@@ -51,7 +52,7 @@ fn main() {
             mid_y_vert.transform(transform),
             max_y_vert.transform(transform)
         );
-
+        
         //
         disp.update();
     }

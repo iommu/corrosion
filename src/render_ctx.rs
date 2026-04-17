@@ -1,68 +1,58 @@
 use std::{mem::swap, usize};
 
-use crate::{bitmap::Bitmap, matrix::Matrix4F, pixel::Pixel, vertex::Vertex};
+use crate::{bitmap::Bitmap, edge::Edge, matrix::Matrix4F, pixel::Pixel, vertex::Vertex};
 
-pub struct RenderCtx {
-    scan_buffer: Vec<[usize; 2]>,
-}
+impl Bitmap {
+    fn draw_scan_line(&mut self, left: &Edge, right: &Edge, y: usize) {
+        let x_min = left.x().ceil() as i32;
+        let x_max = right.x().ceil() as i32;
 
-impl RenderCtx {
-    pub fn new_from_bitmap(bitmap: &Bitmap) -> Self {
-        Self::new(bitmap.height())
-    }
-
-    pub fn new(height: usize) -> Self {
-        Self {
-            scan_buffer: vec![[0; 2]; height],
+        for x in x_min..x_max {
+            self.draw_pixel(x as usize, y, Pixel::WHITE);
         }
     }
 
-    pub fn draw_scan_buffer(&mut self, y: usize, x_min: usize, x_max: usize) {
-        self.scan_buffer[y] = [x_min, x_max];
-    }
+    fn scan_edges(&mut self, a: &mut Edge, b: &mut Edge, handedness: bool) {
+        let y_start = b.y_start();
+        let y_end = b.y_end();
 
-    pub fn fill_shape(&self, bitmap: &mut Bitmap, y_min: usize, y_max: usize) {
-        for y in y_min..y_max {
-            let [x_min, x_max] = self.scan_buffer[y];
-            for x in x_min..x_max {
-                bitmap.draw_pixel(x, y, Pixel::WHITE);
-            }
-        }
-    }
-
-    fn scan_convert_line(&mut self, min_y_vert: Vertex, max_y_vert: Vertex, side: usize) {
-        let y_start = min_y_vert.y().ceil() as i32;
-        let y_end = max_y_vert.y().ceil() as i32;
-        // let x_start = min_y_vert.x().ceil() as i32;
-        // let x_end = max_y_vert.x().ceil() as i32;
-
-        let y_dist = max_y_vert.y() - min_y_vert.y();
-        let x_dist = max_y_vert.x() - min_y_vert.x();
-
-        if y_dist <= 0.0 {
-            return;
-        }
-
-        let x_step = x_dist / y_dist;
-        let y_pre = y_start as f32 - min_y_vert.y();
-        let mut x_cur = min_y_vert.x() + y_pre * x_step;
+        let [left, right] = match handedness {
+            true => [b, a],
+            false => [a, b],
+        };
 
         for y in y_start..y_end {
-            self.scan_buffer[y as usize][side] = x_cur.ceil() as usize;
-            x_cur += x_step;
+            self.draw_scan_line(left, right, y as usize);
+            left.step();
+            right.step();
         }
     }
 
-    pub fn scan_convert_tri(
+    fn scan_tri(
         &mut self,
         min_y_vert: Vertex,
         mid_y_vert: Vertex,
         max_y_vert: Vertex,
-        handedness: i32,
+        handedness: bool,
     ) {
-        self.scan_convert_line(min_y_vert, max_y_vert, (0 + handedness) as usize);
-        self.scan_convert_line(min_y_vert, mid_y_vert, (1 - handedness) as usize);
-        self.scan_convert_line(mid_y_vert, max_y_vert, (1 - handedness) as usize);
+        let mut top_to_bot = Edge::new(min_y_vert, max_y_vert);
+        let mut top_to_mid = Edge::new(min_y_vert, mid_y_vert);
+        let mut mid_to_bot = Edge::new(mid_y_vert, max_y_vert);
+
+        self.scan_edges(&mut top_to_bot, &mut top_to_mid, handedness);
+        self.scan_edges(&mut top_to_bot, &mut mid_to_bot, handedness);
+    }
+}
+
+pub struct RenderCtx {}
+
+impl RenderCtx {
+    pub fn new_from_bitmap(bitmap: &Bitmap) -> Self {
+        Self::new()
+    }
+
+    pub fn new() -> Self {
+        Self {}
     }
 
     pub fn fill_tri(
@@ -91,13 +81,8 @@ impl RenderCtx {
         }
 
         let area: f32 = min_y_vert.tri_area(max_y_vert, mid_y_vert);
-        let handedness = if area >= 0.0 { 1 } else { 0 };
+        let handedness = if area >= 0.0 { true } else { false };
 
-        self.scan_convert_tri(*min_y_vert, *mid_y_vert, *max_y_vert, handedness);
-        self.fill_shape(
-            bitmap,
-            min_y_vert.y().ceil() as usize,
-            max_y_vert.y().ceil() as usize,
-        );
+        bitmap.scan_tri(*min_y_vert, *mid_y_vert, *max_y_vert, handedness);
     }
 }
