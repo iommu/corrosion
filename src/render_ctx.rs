@@ -31,23 +31,24 @@ impl RenderCtx {
     }
 
     fn scan_convert_line(&mut self, min_y_vert: Vertex, max_y_vert: Vertex, side: usize) {
-        let y_start = min_y_vert.y() as i32;
-        let y_end = max_y_vert.y() as i32;
-        let x_start = min_y_vert.x() as i32;
-        let x_end = max_y_vert.x() as i32;
+        let y_start = min_y_vert.y().ceil() as i32;
+        let y_end = max_y_vert.y().ceil() as i32;
+        // let x_start = min_y_vert.x().ceil() as i32;
+        // let x_end = max_y_vert.x().ceil() as i32;
 
-        let y_dist = y_end - y_start;
-        let x_dist = x_end - x_start;
+        let y_dist = max_y_vert.y() - min_y_vert.y();
+        let x_dist = max_y_vert.x() - min_y_vert.x();
 
-        if y_dist <= 0 {
+        if y_dist <= 0.0 {
             return;
         }
 
-        let x_step = x_dist as f32 / y_dist as f32;
-        let mut x_cur = x_start as f32;
+        let x_step = x_dist / y_dist;
+        let y_pre = y_start as f32 - min_y_vert.y();
+        let mut x_cur = min_y_vert.x() + y_pre * x_step;
 
         for y in y_start..y_end {
-            self.scan_buffer[y as usize][side] = x_cur as usize;
+            self.scan_buffer[y as usize][side] = x_cur.ceil() as usize;
             x_cur += x_step;
         }
     }
@@ -64,8 +65,15 @@ impl RenderCtx {
         self.scan_convert_line(mid_y_vert, max_y_vert, (1 - handedness) as usize);
     }
 
-    pub fn fill_tri(&mut self, bitmap: &mut Bitmap, mut vert_1: Vertex, mut vert_2: Vertex, mut vert_3: Vertex) {
-        let ss_transform = Matrix4F::new_ss_transform(bitmap.width() as f32 /2.0, bitmap.height() as f32 / 2.0);
+    pub fn fill_tri(
+        &mut self,
+        bitmap: &mut Bitmap,
+        mut vert_1: Vertex,
+        mut vert_2: Vertex,
+        mut vert_3: Vertex,
+    ) {
+        let ss_transform =
+            Matrix4F::new_ss_transform(bitmap.width() as f32 / 2.0, bitmap.height() as f32 / 2.0);
         let min_y_vert = &mut vert_1.transform(ss_transform).perspective_div();
         let mid_y_vert = &mut vert_2.transform(ss_transform).perspective_div();
         let max_y_vert = &mut vert_3.transform(ss_transform).perspective_div();
@@ -83,13 +91,13 @@ impl RenderCtx {
         }
 
         let area: f32 = min_y_vert.tri_area(max_y_vert, mid_y_vert);
-        let handedness = if area >= 0.0 {
-            1
-        } else {
-            0
-        };
+        let handedness = if area >= 0.0 { 1 } else { 0 };
 
         self.scan_convert_tri(*min_y_vert, *mid_y_vert, *max_y_vert, handedness);
-        self.fill_shape(bitmap, min_y_vert.y() as usize, max_y_vert.y() as usize);
+        self.fill_shape(
+            bitmap,
+            min_y_vert.y().ceil() as usize,
+            max_y_vert.y().ceil() as usize,
+        );
     }
 }
