@@ -6,8 +6,10 @@ pub struct Edge {
     x_step: f32,
     y_start: i32,
     y_end: i32,
-    color: Vector4F,
-    color_step: Vector4F,
+    tex_coord_x: f32,
+    tex_coord_x_step: f32,
+    tex_coord_y: f32,
+    tex_coord_y_step: f32,
 }
 
 impl Edge {
@@ -17,6 +19,9 @@ impl Edge {
         max_y_vert: Vertex,
         min_y_vert_idx: usize,
     ) -> Self {
+        let y_start = min_y_vert.y().ceil() as i32;
+        let y_end = max_y_vert.y().ceil() as i32;
+
         let y_dist = max_y_vert.y() - min_y_vert.y();
         let x_dist = max_y_vert.x() - min_y_vert.x();
 
@@ -26,13 +31,25 @@ impl Edge {
         let x = min_y_vert.x() + y_pre * x_step;
         let x_pre = x - min_y_vert.x();
 
+        let tex_coord_x = gradients.tex_coords_x[min_y_vert_idx]
+            + gradients.tex_coord_xx_step * x_pre
+            + gradients.tex_coord_xy_step * y_pre;
+        let tex_coord_y = gradients.tex_coords_y[min_y_vert_idx]
+            + gradients.tex_coord_yx_step * x_pre
+            + gradients.tex_coord_yy_step * y_pre;
+
+        let tex_coord_x_step = gradients.tex_coord_xy_step + gradients.tex_coord_xx_step * x_step;
+        let tex_coord_y_step = gradients.tex_coord_yy_step + gradients.tex_coord_yx_step * x_step;
+
         Self {
             x,
-            x_step: x_step,
-            y_start: min_y_vert.y().ceil() as i32,
-            y_end: max_y_vert.y().ceil() as i32,
-            color: gradients.color()[min_y_vert_idx] + gradients.color_y_step() * y_pre + gradients.color_x_step() * x_pre,
-            color_step : gradients.color_y_step() + gradients.color_x_step() * x_step,
+            x_step,
+            y_start,
+            y_end,
+            tex_coord_x,
+            tex_coord_x_step,
+            tex_coord_y,
+            tex_coord_y_step,
         }
     }
 
@@ -52,16 +69,17 @@ impl Edge {
         self.y_end
     }
 
+    pub fn tex_coord_x(&self) -> f32 {
+        self.tex_coord_x
+    }
+
+    pub fn tex_coord_y(&self) -> f32 {
+        self.tex_coord_y
+    }
+
     pub fn step(&mut self) {
         self.x += self.x_step;
-        self.color = self.color + self.color_step
-    }
-
-    pub fn color(&self) -> Vector4F {
-        self.color
-    }
-
-    pub fn color_step(&self) -> Vector4F {
-        self.color_step
+        self.tex_coord_x += self.tex_coord_x_step;
+        self.tex_coord_y += self.tex_coord_y_step;
     }
 }

@@ -15,6 +15,10 @@ impl Bitmap {
         }
     }
 
+    pub fn size(&self) -> [usize; 2] {
+        self.size
+    }
+
     pub fn fill_pixel(&mut self, pixel: Pixel) {
         self.components.fill([pixel.r, pixel.g, pixel.b, pixel.a]);
     }
@@ -26,6 +30,10 @@ impl Bitmap {
     pub fn draw_pixel(&mut self, x: usize, y: usize, pixel: Pixel) {
         self.components[y * self.size[0] + x]
             .copy_from_slice(&[pixel.r, pixel.g, pixel.b, pixel.a]);
+    }
+
+    pub fn copy_pixel(&mut self, x_dest : usize, y_dest : usize, x_src : usize, y_src : usize, bitmap : &Bitmap) {
+        self.components[y_dest * self.size[0] + x_dest] = bitmap.components[y_src * bitmap.size[0] + x_src];
     }
 
     pub fn get_buffer(&mut self) -> &[u8] {

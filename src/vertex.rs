@@ -3,20 +3,20 @@ use crate::{matrix::Matrix4F, vector::Vector4F};
 #[derive(Clone, Copy)]
 pub struct Vertex {
     pos: Vector4F,
-    color: Vector4F,
+    tex_coords: Vector4F,
 }
 
 impl Vertex {
-    pub fn new(pos: Vector4F, color: Vector4F) -> Self {
-        Self { pos, color }
+    pub fn new(pos: Vector4F, tex_coords: Vector4F) -> Self {
+        Self { pos, tex_coords }
     }
 
     pub fn pos(&self) -> Vector4F {
         self.pos
     }
 
-    pub fn color(&self) -> Vector4F {
-        self.color
+    pub fn tex_coords(&self) -> Vector4F {
+        self.tex_coords
     }
 
     pub fn x(&self) -> f32 {
@@ -44,7 +44,7 @@ impl Vertex {
     }
 
     pub fn transform(&self, transform: Matrix4F) -> Self {
-        Self::new(transform.transform(self.pos), self.color)
+        Self::new(transform.transform(self.pos), self.tex_coords)
     }
 
     pub fn perspective_div(&self) -> Self {
@@ -55,7 +55,7 @@ impl Vertex {
                 self.pos.z() / self.pos.w(),
                 self.pos.w(), // sneaky storage
             ),
-            self.color,
+            self.tex_coords,
         )
     }
 
