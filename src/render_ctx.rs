@@ -1,18 +1,39 @@
 use std::{mem::swap, usize};
 
-use crate::{bitmap::Bitmap, edge::Edge, matrix::Matrix4F, pixel::Pixel, vertex::Vertex};
+use crate::{
+    bitmap::Bitmap,
+    edge::Edge,
+    gradients::{self, Gradients},
+    matrix::Matrix4F,
+    pixel::Pixel,
+    vertex::Vertex,
+};
 
 impl Bitmap {
-    fn draw_scan_line(&mut self, left: &Edge, right: &Edge, y: usize) {
+    fn draw_scan_line(&mut self, gradients: &Gradients, left: &Edge, right: &Edge, y: usize) {
         let x_min = left.x().ceil() as i32;
         let x_max = right.x().ceil() as i32;
+        let x_pre = x_min as f32 - left.x();
+        let min_color = left.color() + gradients.color_x_step() * x_pre;
+        let max_color = right.color() + gradients.color_x_step() * x_pre;
+
+        let mut lerp = 0.0;
+        let lerp_step = 1.0 / (x_max - x_min) as f32;
 
         for x in x_min..x_max {
-            self.draw_pixel(x as usize, y, Pixel::WHITE);
+            let color = min_color.lerp(max_color, lerp);
+            let color = Pixel::new(
+                (color.x() * 255.0) as u8,
+                (color.y() * 255.0) as u8,
+                (color.z() * 255.0) as u8,
+                0xff,
+            );
+            self.draw_pixel(x as usize, y, color);
+            lerp += lerp_step;
         }
     }
 
-    fn scan_edges(&mut self, a: &mut Edge, b: &mut Edge, handedness: bool) {
+    fn scan_edges(&mut self, gradients : &Gradients, a: &mut Edge, b: &mut Edge, handedness: bool) {
         let y_start = b.y_start();
         let y_end = b.y_end();
 
@@ -22,7 +43,7 @@ impl Bitmap {
         };
 
         for y in y_start..y_end {
-            self.draw_scan_line(left, right, y as usize);
+            self.draw_scan_line(gradients, left, right, y as usize);
             left.step();
             right.step();
         }
@@ -35,12 +56,13 @@ impl Bitmap {
         max_y_vert: Vertex,
         handedness: bool,
     ) {
-        let mut top_to_bot = Edge::new(min_y_vert, max_y_vert);
-        let mut top_to_mid = Edge::new(min_y_vert, mid_y_vert);
-        let mut mid_to_bot = Edge::new(mid_y_vert, max_y_vert);
+        let gradients = Gradients::new(min_y_vert, mid_y_vert, max_y_vert);
+        let mut top_to_bot = Edge::new(&gradients, min_y_vert, max_y_vert, 0);
+        let mut top_to_mid = Edge::new(&gradients, min_y_vert, mid_y_vert, 0);
+        let mut mid_to_bot = Edge::new(&gradients, mid_y_vert, max_y_vert, 1);
 
-        self.scan_edges(&mut top_to_bot, &mut top_to_mid, handedness);
-        self.scan_edges(&mut top_to_bot, &mut mid_to_bot, handedness);
+        self.scan_edges(&gradients,&mut top_to_bot, &mut top_to_mid, handedness);
+        self.scan_edges(&gradients,&mut top_to_bot, &mut mid_to_bot, handedness);
     }
 }
 

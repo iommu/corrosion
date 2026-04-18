@@ -2,18 +2,19 @@ use std::{ops::Mul, time::Instant};
 
 use crate::{
     display::Display, matrix::Matrix4F, pixel::Pixel, render_ctx::RenderCtx, stars3D::Stars3D,
-    vertex::Vertex,
+    vector::Vector4F, vertex::Vertex,
 };
 
 mod bitmap;
 mod display;
+mod edge;
 mod matrix;
 mod pixel;
 mod render_ctx;
 mod stars3D;
 mod vector;
 mod vertex;
-mod edge;
+mod gradients;
 
 fn main() {
     let mut start = Instant::now();
@@ -21,16 +22,20 @@ fn main() {
     let mut rctx = RenderCtx::new_from_bitmap(&disp.bitmap);
     disp.start();
 
-    let min_y_vert = Vertex::new(-1.0, -1.0, 0.0);
-    let mid_y_vert = Vertex::new(0.0, 1.0, 0.0);
-    let max_y_vert = Vertex::new(1.0, -1.0, 0.0);
-
-    let projection = Matrix4F::new_perspective(
-        (70.0_f32).to_radians(),
-        800.0/600.0,
-        0.1,
-        1000.0,
+    let min_y_vert = Vertex::new(
+        Vector4F::new(-1.0, -1.0, 0.0, 1.0),
+        Vector4F::new(1.0, 0.0, 0.0, 1.0),
     );
+    let mid_y_vert = Vertex::new(
+        Vector4F::new(0.0, 1.0, 0.0, 1.0),
+        Vector4F::new(0.0, 1.0, 0.0, 1.0),
+    );
+    let max_y_vert = Vertex::new(
+        Vector4F::new(1.0, -1.0, 0.0, 1.0),
+        Vector4F::new(0.0, 0.0, 1.0, 1.0),
+    );
+
+    let projection = Matrix4F::new_perspective((70.0_f32).to_radians(), 800.0 / 600.0, 0.1, 1000.0);
 
     //
     let mut rot_count: f32 = 0.0;
@@ -50,9 +55,9 @@ fn main() {
             &mut disp.bitmap,
             min_y_vert.transform(transform),
             mid_y_vert.transform(transform),
-            max_y_vert.transform(transform)
+            max_y_vert.transform(transform),
         );
-        
+
         //
         disp.update();
     }

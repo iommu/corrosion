@@ -2,14 +2,21 @@ use crate::{matrix::Matrix4F, vector::Vector4F};
 
 #[derive(Clone, Copy)]
 pub struct Vertex {
-    pub pos: Vector4F,
+    pos: Vector4F,
+    color: Vector4F,
 }
 
 impl Vertex {
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
-        Self {
-            pos: Vector4F::new(x, y, z, 1.0),
-        }
+    pub fn new(pos: Vector4F, color: Vector4F) -> Self {
+        Self { pos, color }
+    }
+
+    pub fn pos(&self) -> Vector4F {
+        self.pos
+    }
+
+    pub fn color(&self) -> Vector4F {
+        self.color
     }
 
     pub fn x(&self) -> f32 {
@@ -36,21 +43,20 @@ impl Vertex {
         self.pos.z_mut()
     }
 
-    pub fn transform(&self, transform: Matrix4F) -> Vertex {
-        Vertex {
-            pos: transform.transform(self.pos),
-        }
+    pub fn transform(&self, transform: Matrix4F) -> Self {
+        Self::new(transform.transform(self.pos), self.color)
     }
 
     pub fn perspective_div(&self) -> Self {
-        Self {
-            pos: Vector4F::new(
+        Self::new(
+            Vector4F::new(
                 self.pos.x() / self.pos.w(),
                 self.pos.y() / self.pos.w(),
                 self.pos.z() / self.pos.w(),
                 self.pos.w(), // sneaky storage
             ),
-        }
+            self.color,
+        )
     }
 
     pub fn tri_area(&self, vert_b: &Vertex, vert_c: &Vertex) -> f32 {
