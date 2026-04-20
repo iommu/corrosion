@@ -55,7 +55,7 @@ fn main() {
         //
         rot_count += delta;
         let translation = Matrix4F::new_translation(0.0, 0.0, 3.0);
-        let rotation = Matrix4F::new_rotation(0.0, rot_count, 0.0);
+        let rotation = Matrix4F::new_rotation(rot_count, rot_count, rot_count);
         let transform = projection.mul(translation.mul(rotation));
 
         //

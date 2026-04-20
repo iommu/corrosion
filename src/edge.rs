@@ -10,6 +10,8 @@ pub struct Edge {
     tex_coord_x_step: f32,
     tex_coord_y: f32,
     tex_coord_y_step: f32,
+    z_inv: f32,
+    z_step_inv: f32,
 }
 
 impl Edge {
@@ -41,6 +43,11 @@ impl Edge {
         let tex_coord_x_step = gradients.tex_coord_xy_step + gradients.tex_coord_xx_step * x_step;
         let tex_coord_y_step = gradients.tex_coord_yy_step + gradients.tex_coord_yx_step * x_step;
 
+        let z_inv = gradients.z_inv[min_y_vert_idx]
+            + gradients.zx_step_inv * x_pre
+            + gradients.zy_step_inv * y_pre;
+        let z_step_inv = gradients.zy_step_inv + gradients.zx_step_inv * x_step;
+
         Self {
             x,
             x_step,
@@ -50,6 +57,8 @@ impl Edge {
             tex_coord_x_step,
             tex_coord_y,
             tex_coord_y_step,
+            z_inv,
+            z_step_inv,
         }
     }
 
@@ -77,9 +86,14 @@ impl Edge {
         self.tex_coord_y
     }
 
+    pub fn z_inv(&self) -> f32 {
+        self.z_inv
+    }
+
     pub fn step(&mut self) {
         self.x += self.x_step;
         self.tex_coord_x += self.tex_coord_x_step;
         self.tex_coord_y += self.tex_coord_y_step;
+        self.z_inv += self.z_step_inv
     }
 }

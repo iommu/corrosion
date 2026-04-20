@@ -10,37 +10,33 @@ use crate::{
 };
 
 impl Bitmap {
-    fn draw_scan_line(
-        &mut self,
-        gradients: &Gradients,
-        left: &Edge,
-        right: &Edge,
-        y: usize,
-        texture: &Bitmap,
-    ) {
+    fn draw_scan_line(&mut self, left: &Edge, right: &Edge, y: usize, texture: &Bitmap) {
         let x_min = left.x().ceil() as i32;
         let x_max = right.x().ceil() as i32;
         let x_pre = x_min as f32 - left.x();
-        let mut tex_coord_x = left.tex_coord_x() + gradients.tex_coord_xx_step * x_pre;
-        let mut tex_coord_y = left.tex_coord_y() + gradients.tex_coord_yx_step * x_pre;
+
+        let x_dist = right.x() - left.x();
+        let tex_coord_xx_step = (right.tex_coord_x() - left.tex_coord_x()) / x_dist;
+        let tex_coord_yx_step = (right.tex_coord_y() - left.tex_coord_y()) / x_dist;
+        let zx_step_inv = (right.z_inv() - left.z_inv()) / x_dist;
+
+        let mut tex_coord_x = left.tex_coord_x() + tex_coord_xx_step * x_pre;
+        let mut tex_coord_y = left.tex_coord_y() + tex_coord_yx_step * x_pre;
+        let mut z_inv = left.z_inv() + zx_step_inv * x_pre;
 
         for x in x_min..x_max {
-            let x_src = (tex_coord_x * (texture.size()[0] - 1) as f32 + 0.5) as usize;
-            let y_src = (tex_coord_y * (texture.size()[1] - 1) as f32 + 0.5) as usize;
+            let z = 1.0 / z_inv;
+            let x_src = ((tex_coord_x * z) * (texture.size()[0] - 1) as f32 + 0.5) as usize;
+            let y_src = ((tex_coord_y * z) * (texture.size()[1] - 1) as f32 + 0.5) as usize;
             self.copy_pixel(x as usize, y, x_src, y_src, texture);
-            tex_coord_x += gradients.tex_coord_xx_step;
-            tex_coord_y += gradients.tex_coord_yx_step;
+            //
+            tex_coord_x += tex_coord_xx_step;
+            tex_coord_y += tex_coord_yx_step;
+            z_inv += zx_step_inv;
         }
     }
 
-    fn scan_edges(
-        &mut self,
-        gradients: &Gradients,
-        a: &mut Edge,
-        b: &mut Edge,
-        handedness: bool,
-        texture: &Bitmap,
-    ) {
+    fn scan_edges(&mut self, a: &mut Edge, b: &mut Edge, handedness: bool, texture: &Bitmap) {
         let y_start = b.y_start();
         let y_end = b.y_end();
 
@@ -50,7 +46,7 @@ impl Bitmap {
         };
 
         for y in y_start..y_end {
-            self.draw_scan_line(gradients, left, right, y as usize, texture);
+            self.draw_scan_line(left, right, y as usize, texture);
             left.step();
             right.step();
         }
@@ -69,20 +65,8 @@ impl Bitmap {
         let mut top_to_mid = Edge::new(&gradients, min_y_vert, mid_y_vert, 0);
         let mut mid_to_bot = Edge::new(&gradients, mid_y_vert, max_y_vert, 1);
 
-        self.scan_edges(
-            &gradients,
-            &mut top_to_bot,
-            &mut top_to_mid,
-            handedness,
-            texture,
-        );
-        self.scan_edges(
-            &gradients,
-            &mut top_to_bot,
-            &mut mid_to_bot,
-            handedness,
-            texture,
-        );
+        self.scan_edges(&mut top_to_bot, &mut top_to_mid, handedness, texture);
+        self.scan_edges(&mut top_to_bot, &mut mid_to_bot, handedness, texture);
     }
 }
 
