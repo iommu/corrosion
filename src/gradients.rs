@@ -5,12 +5,15 @@ pub struct Gradients {
     pub tex_coords_x: Vec<f32>,
     pub tex_coords_y: Vec<f32>,
     pub z_inv: Vec<f32>,
+    pub depth: Vec<f32>,
     pub tex_coord_xx_step: f32,
     pub tex_coord_xy_step: f32,
     pub tex_coord_yx_step: f32,
     pub tex_coord_yy_step: f32,
     pub zx_step_inv: f32,
     pub zy_step_inv: f32,
+    pub depth_x_step: f32,
+    pub depth_y_step: f32,
 }
 
 impl Gradients {
@@ -37,6 +40,8 @@ impl Gradients {
             max_y_vert.tex_coords().y() * z_inv[2],
         ];
 
+        let depth = vec![min_y_vert.pos().z(), mid_y_vert.pos().z(), max_y_vert.pos().z()];
+
         let tex_coord_xx_step =
             Self::calc_x_step(&tex_coords_x, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
         let tex_coord_xy_step =
@@ -47,10 +52,11 @@ impl Gradients {
         let tex_coord_yy_step =
             Self::calc_y_step(&tex_coords_y, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
 
-        let zx_step_inv =
-            Self::calc_x_step(&z_inv, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
-        let zy_step_inv =
-            Self::calc_y_step(&z_inv, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
+        let zx_step_inv = Self::calc_x_step(&z_inv, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
+        let zy_step_inv = Self::calc_y_step(&z_inv, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
+
+        let depth_x_step = Self::calc_x_step(&depth, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
+        let depth_y_step = Self::calc_y_step(&depth, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
 
         Self {
             tex_coords_x,
@@ -62,6 +68,9 @@ impl Gradients {
             tex_coord_yy_step,
             zx_step_inv,
             zy_step_inv,
+            depth,
+            depth_x_step,
+            depth_y_step,
         }
     }
 

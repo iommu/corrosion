@@ -4,7 +4,7 @@ use image::ImageError;
 use rand::RngExt;
 
 use crate::{
-    bitmap::Bitmap, display::Display, matrix::Matrix4F, mesh::Mesh, pixel::Pixel, stars3D::Stars3D, vector::Vector4F, vertex::Vertex
+    bitmap::Bitmap, display::Display, matrix::Matrix4F, mesh::Mesh, pixel::Pixel, render_ctx::{clear_buffer, gen_buffer}, stars3D::Stars3D, vector::Vector4F, vertex::Vertex
 };
 
 mod bitmap;
@@ -24,8 +24,9 @@ mod indexed_model;
 fn main() -> Result<(), ImageError> {
     let mut start = Instant::now();
     let mut disp = Display::new([800, 600], "Software rendering".to_owned());
+    let mut z_buffer = gen_buffer(&disp.bitmap);
     let texture = Bitmap::new_from_file("res/bricks.jpg")?;
-    let mesh = Mesh::new_from_obj_file("res/icosphere.obj")?;
+    let mesh = Mesh::new_from_obj_file("res/monkey2.obj")?;
 
     disp.start();
 
@@ -58,7 +59,8 @@ fn main() -> Result<(), ImageError> {
 
         //
         disp.bitmap.fill_pixel(Pixel::BLACK);
-        disp.bitmap.draw_mesh(&mesh, &transform, &texture);
+        clear_buffer(&mut z_buffer);
+        disp.bitmap.draw_mesh(&mesh, &transform, &texture, &mut z_buffer);
         // rctx.fill_tri(
         //     &mut disp.bitmap,
         //     min_y_vert.transform(transform),
