@@ -1,6 +1,6 @@
 use std::{io, path::Path};
 
-use crate::{obj_loader::OBJModel, vertex::Vertex};
+use crate::{bitmap::Bitmap, obj_loader::OBJModel, vertex::Vertex};
 
 pub struct Mesh {
     vertices: Vec<Vertex>,

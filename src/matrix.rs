@@ -22,8 +22,8 @@ impl Matrix4F {
     pub fn new_ss_transform(half_width: f32, half_height: f32) -> Self {
         Self {
             mat: [
-                [half_width, 0.0, 0.0, half_width],
-                [0.0, -half_height, 0.0, half_height],
+                [half_width, 0.0, 0.0, half_width - 0.5],
+                [0.0, -half_height, 0.0, half_height - 0.5],
                 [0.0, 0.0, 1.0, 0.0],
                 [0.0, 0.0, 0.0, 1.0],
             ],

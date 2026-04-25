@@ -1,4 +1,4 @@
-use std::ops::{self, Add, Mul, Sub};
+use std::ops::{self, Add, Index, IndexMut, Mul, Sub};
 
 use derive_new::new;
 
@@ -210,5 +210,33 @@ impl ops::Div<f32> for Vector4F {
 impl PartialEq for Vector4F {
     fn eq(&self, rhs: &Self) -> bool {
         (self.x == rhs.x) && (self.y == rhs.y) && (self.z == rhs.z) && (self.w == rhs.w)
+    }
+}
+
+
+// Indexing
+
+impl Index<usize> for Vector4F {
+    type Output = f32;
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            3 => &self.w,
+            _ => panic!("Index out of bounds")
+        }
+    }
+}
+
+impl IndexMut<usize> for Vector4F {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        match index {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
+            3 => &mut self.w,
+            _ => panic!("Index out of bounds")
+        }
     }
 }

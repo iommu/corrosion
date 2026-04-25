@@ -53,7 +53,7 @@ fn main() -> Result<(), ImageError> {
 
         //
         rot_count += delta;
-        let translation = Matrix4F::new_translation(0.0, 0.0, 3.0);
+        let translation = Matrix4F::new_translation(0.0, 0.0, 3.0 - 3.0 * rot_count.sin());
         let rotation = Matrix4F::new_rotation(rot_count, rot_count, rot_count);
         let transform = projection.mul(translation.mul(rotation));
 

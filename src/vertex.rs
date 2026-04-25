@@ -1,3 +1,5 @@
+use std::ops::{Index, IndexMut};
+
 use crate::{matrix::Matrix4F, vector::Vector4F};
 
 #[derive(Clone, Copy)]
@@ -9,6 +11,13 @@ pub struct Vertex {
 impl Vertex {
     pub fn new(pos: Vector4F, tex_coords: Vector4F) -> Self {
         Self { pos, tex_coords }
+    }
+
+    pub fn lerp(&self, rhs: Self, factor: f32) -> Self {
+        Self {
+            pos: self.pos.lerp(rhs.pos, factor),
+            tex_coords: self.tex_coords.lerp(rhs.tex_coords, factor),
+        }
     }
 
     pub fn pos(&self) -> Vector4F {
@@ -43,7 +52,15 @@ impl Vertex {
         self.pos.z_mut()
     }
 
-    pub fn transform(&self, transform: Matrix4F) -> Self {
+    pub fn w(&self) -> f32 {
+        self.pos.w()
+    }
+
+    pub fn w_mut(&mut self) -> &mut f32 {
+        self.pos.w_mut()
+    }
+
+    pub fn transform(&self, transform: &Matrix4F) -> Self {
         Self::new(transform.transform(self.pos), self.tex_coords)
     }
 
@@ -67,5 +84,26 @@ impl Vertex {
 
         // 2D cross product
         return ((x_1 * y_2) - (x_2 * y_1)) / 2.0;
+    }
+
+    pub fn is_inside_view_frustum(&self) -> bool {
+        (self.pos.x().abs() <= self.pos.w().abs())
+            && (self.pos.y().abs() <= self.pos.w().abs())
+            && (self.pos.z().abs() <= self.pos.w().abs())
+    }
+}
+
+// Indexing
+
+impl Index<usize> for Vertex {
+    type Output = f32;
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.pos[index]
+    }
+}
+
+impl IndexMut<usize> for Vertex {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.pos[index]
     }
 }

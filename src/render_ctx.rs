@@ -19,6 +19,24 @@ pub fn clear_buffer(z_buffer: &mut Vec<f32>) {
 }
 
 impl Bitmap {
+    pub fn draw_mesh(
+        &mut self,
+        mesh: &Mesh,
+        transform: &Matrix4F,
+        texture: &Bitmap,
+        z_buffer: &mut Vec<f32>,
+    ) {
+        for chunk in mesh.indices().chunks_exact(3) {
+            self.draw_tri(
+                &mesh.vertices()[chunk[0] as usize].transform(transform),
+                &mesh.vertices()[chunk[1] as usize].transform(transform),
+                &mesh.vertices()[chunk[2] as usize].transform(transform),
+                texture,
+                z_buffer,
+            );
+        }
+    }
+
     fn draw_scan_line(
         &mut self,
         left: &Edge,
@@ -113,37 +131,109 @@ impl Bitmap {
         );
     }
 
-    pub fn draw_mesh(
+    pub fn draw_tri(
         &mut self,
-        mesh: &Mesh,
-        transform: &Matrix4F,
+        vert_1: &Vertex,
+        vert_2: &Vertex,
+        vert_3: &Vertex,
         texture: &Bitmap,
         z_buffer: &mut Vec<f32>,
     ) {
-        for idx in (0..mesh.indices().len()).step_by(3) {
-            self.fill_tri(
-                mesh.vertices()[mesh.indices()[idx + 0] as usize].transform(*transform),
-                mesh.vertices()[mesh.indices()[idx + 1] as usize].transform(*transform),
-                mesh.vertices()[mesh.indices()[idx + 2] as usize].transform(*transform),
-                texture,
-                z_buffer,
-            )
+        let v_1_inside = vert_1.is_inside_view_frustum();
+        let v_2_inside = vert_2.is_inside_view_frustum();
+        let v_3_inside = vert_3.is_inside_view_frustum();
+
+        if v_1_inside && v_2_inside && v_3_inside {
+            self.fill_tri(vert_1, vert_2, vert_3, texture, z_buffer);
+            return;
+        }
+
+        if !v_1_inside && !v_2_inside && !v_3_inside {
+            return;
+        }
+
+        let mut vertices = vec![*vert_1, *vert_2, *vert_3];
+        let mut aux_list = vec![*vert_1; 0];
+
+        if Self::clip_poly_axis(&mut vertices, &mut aux_list, 0)
+            && Self::clip_poly_axis(&mut vertices, &mut aux_list, 1)
+            && Self::clip_poly_axis(&mut vertices, &mut aux_list, 2)
+        {
+            let initial_vert = vertices[0];
+            for index in 1..vertices.len() - 1 {
+                self.fill_tri(
+                    &initial_vert,
+                    &vertices[index],
+                    &vertices[index + 1],
+                    texture,
+                    z_buffer,
+                );
+            }
         }
     }
 
-    pub fn fill_tri(
+    fn clip_poly_axis(
+        vertices: &mut Vec<Vertex>,
+        aux_list: &mut Vec<Vertex>,
+        component_index: usize,
+    ) -> bool {
+        Self::clip_poly_component(vertices, component_index, 1.0, aux_list);
+        vertices.clear();
+
+        if aux_list.is_empty() {
+            return false;
+        }
+
+        Self::clip_poly_component(aux_list, component_index, -1.0, vertices);
+        aux_list.clear();
+
+        return !vertices.is_empty();
+    }
+
+    fn clip_poly_component(
+        vertices: &Vec<Vertex>,
+        component_index: usize,
+        component_factor: f32,
+        result: &mut Vec<Vertex>,
+    ) {
+        let mut prev_vert = &vertices[vertices.len() - 1];
+        let mut prev_comp = prev_vert[component_index] * component_factor;
+        let mut prev_inside = prev_comp <= prev_vert.pos().w();
+
+        for curr_vert in vertices {
+            let curr_comp = curr_vert[component_index] * component_factor;
+            let curr_inside = curr_comp <= curr_vert.pos().w();
+
+            if curr_inside ^ prev_inside {
+                let lerp_factor = (prev_vert.pos().w() - prev_comp)
+                    / ((prev_vert.pos().w() - prev_comp) - (curr_vert.pos().w() - curr_comp));
+
+                result.push(prev_vert.lerp(*curr_vert, lerp_factor));
+            }
+
+            if curr_inside {
+                result.push(*curr_vert);
+            }
+
+            prev_vert = curr_vert;
+            prev_comp = curr_comp;
+            prev_inside = curr_inside;
+        }
+    }
+
+    fn fill_tri(
         &mut self,
-        mut vert_1: Vertex,
-        mut vert_2: Vertex,
-        mut vert_3: Vertex,
+        vert_1: &Vertex,
+        vert_2: &Vertex,
+        vert_3: &Vertex,
         texture: &Bitmap,
         z_buffer: &mut Vec<f32>,
     ) {
         let ss_transform =
             Matrix4F::new_ss_transform(self.width() as f32 / 2.0, self.height() as f32 / 2.0);
-        let min_y_vert = &mut vert_1.transform(ss_transform).perspective_div();
-        let mid_y_vert = &mut vert_2.transform(ss_transform).perspective_div();
-        let max_y_vert = &mut vert_3.transform(ss_transform).perspective_div();
+        let min_y_vert = &mut vert_1.transform(&ss_transform).perspective_div();
+        let mid_y_vert = &mut vert_2.transform(&ss_transform).perspective_div();
+        let max_y_vert = &mut vert_3.transform(&ss_transform).perspective_div();
 
         if min_y_vert.tri_area(max_y_vert, mid_y_vert) >= 0.0 {
             return;
