@@ -1,9 +1,10 @@
 use std::{ops::Mul, time::Instant};
 
+use image::ImageError;
 use rand::RngExt;
 
 use crate::{
-    bitmap::Bitmap, display::Display, matrix::Matrix4F, pixel::Pixel, render_ctx::RenderCtx, stars3D::Stars3D, vector::Vector4F, vertex::Vertex
+    bitmap::Bitmap, display::Display, matrix::Matrix4F, mesh::Mesh, pixel::Pixel, stars3D::Stars3D, vector::Vector4F, vertex::Vertex
 };
 
 mod bitmap;
@@ -16,33 +17,30 @@ mod stars3D;
 mod vector;
 mod vertex;
 mod gradients;
+mod mesh;
+mod obj_loader;
+mod indexed_model;
 
-fn main() {
-    let mut rng = rand::rng();
+fn main() -> Result<(), ImageError> {
     let mut start = Instant::now();
     let mut disp = Display::new([800, 600], "Software rendering".to_owned());
-    let mut rctx = RenderCtx::new_from_bitmap(&disp.bitmap);
-    let mut texture = Bitmap::new([32, 32]);
-    for x in 0..32 {
-        for y in 0..32 {
-            let pixel = Pixel::new(rng.random::<u8>(), rng.random::<u8>(), rng.random::<u8>(), 0xff);
-            texture.draw_pixel(x, y, pixel);
-        }
-    }
+    let texture = Bitmap::new_from_file("res/bricks.jpg")?;
+    let mesh = Mesh::new_from_obj_file("res/icosphere.obj")?;
+
     disp.start();
 
-    let min_y_vert = Vertex::new(
-        Vector4F::new(-1.0, -1.0, 0.0, 1.0),
-        Vector4F::new(0.0, 0.0, 0.0, 0.0),
-    );
-    let mid_y_vert = Vertex::new(
-        Vector4F::new(0.0, 1.0, 0.0, 1.0),
-        Vector4F::new(0.5, 1.0, 0.0, 0.0),
-    );
-    let max_y_vert = Vertex::new(
-        Vector4F::new(1.0, -1.0, 0.0, 1.0),
-        Vector4F::new(1.0, 0.0, 1.0, 0.0),
-    );
+    // let min_y_vert = Vertex::new(
+    //     Vector4F::new(-1.0, -1.0, 0.0, 1.0),
+    //     Vector4F::new(0.0, 0.0, 0.0, 0.0),
+    // );
+    // let mid_y_vert = Vertex::new(
+    //     Vector4F::new(0.0, 1.0, 0.0, 1.0),
+    //     Vector4F::new(0.5, 1.0, 0.0, 0.0),
+    // );
+    // let max_y_vert = Vertex::new(
+    //     Vector4F::new(1.0, -1.0, 0.0, 1.0),
+    //     Vector4F::new(1.0, 0.0, 1.0, 0.0),
+    // );
 
     let projection = Matrix4F::new_perspective((70.0_f32).to_radians(), 800.0 / 600.0, 0.1, 1000.0);
 
@@ -60,16 +58,19 @@ fn main() {
 
         //
         disp.bitmap.fill_pixel(Pixel::BLACK);
-        rctx.fill_tri(
-            &mut disp.bitmap,
-            min_y_vert.transform(transform),
-            mid_y_vert.transform(transform),
-            max_y_vert.transform(transform),
-            &texture
-        );
+        disp.bitmap.draw_mesh(&mesh, &transform, &texture);
+        // rctx.fill_tri(
+        //     &mut disp.bitmap,
+        //     min_y_vert.transform(transform),
+        //     mid_y_vert.transform(transform),
+        //     max_y_vert.transform(transform),
+        //     &texture
+        // );
 
         //
         disp.update();
     }
     disp.stop();
+
+    Ok(())
 }

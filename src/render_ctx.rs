@@ -5,6 +5,7 @@ use crate::{
     edge::Edge,
     gradients::{self, Gradients},
     matrix::Matrix4F,
+    mesh::Mesh,
     pixel::Pixel,
     vertex::Vertex,
 };
@@ -68,32 +69,34 @@ impl Bitmap {
         self.scan_edges(&mut top_to_bot, &mut top_to_mid, handedness, texture);
         self.scan_edges(&mut top_to_bot, &mut mid_to_bot, handedness, texture);
     }
-}
 
-pub struct RenderCtx {}
-
-impl RenderCtx {
-    pub fn new_from_bitmap(bitmap: &Bitmap) -> Self {
-        Self::new()
-    }
-
-    pub fn new() -> Self {
-        Self {}
+    pub fn draw_mesh(&mut self, mesh: &Mesh, transform: &Matrix4F, texture: &Bitmap) {
+        for idx in (0..mesh.indices().len()).step_by(3) {
+            self.fill_tri(
+                mesh.vertices()[mesh.indices()[idx + 0] as usize].transform(*transform),
+                mesh.vertices()[mesh.indices()[idx + 1] as usize].transform(*transform),
+                mesh.vertices()[mesh.indices()[idx + 2] as usize].transform(*transform),
+                texture,
+            )
+        }
     }
 
     pub fn fill_tri(
-        &mut self,
-        bitmap: &mut Bitmap,
+        &mut self, 
         mut vert_1: Vertex,
         mut vert_2: Vertex,
         mut vert_3: Vertex,
         texture: &Bitmap,
     ) {
         let ss_transform =
-            Matrix4F::new_ss_transform(bitmap.width() as f32 / 2.0, bitmap.height() as f32 / 2.0);
+            Matrix4F::new_ss_transform(self.width() as f32 / 2.0, self.height() as f32 / 2.0);
         let min_y_vert = &mut vert_1.transform(ss_transform).perspective_div();
         let mid_y_vert = &mut vert_2.transform(ss_transform).perspective_div();
         let max_y_vert = &mut vert_3.transform(ss_transform).perspective_div();
+
+        if min_y_vert.tri_area(max_y_vert, mid_y_vert) >= 0.0 {
+            return;
+        }
 
         if max_y_vert.y() < mid_y_vert.y() {
             swap(max_y_vert, mid_y_vert);
@@ -110,6 +113,6 @@ impl RenderCtx {
         let area: f32 = min_y_vert.tri_area(max_y_vert, mid_y_vert);
         let handedness = if area >= 0.0 { true } else { false };
 
-        bitmap.scan_tri(*min_y_vert, *mid_y_vert, *max_y_vert, handedness, texture);
+        self.scan_tri(*min_y_vert, *mid_y_vert, *max_y_vert, handedness, texture);
     }
 }
