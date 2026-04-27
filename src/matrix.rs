@@ -2,7 +2,9 @@ use std::ops::{Index, IndexMut, Mul};
 
 use crate::vector::Vector4F;
 
-#[derive(Default, Clone, Copy)]
+use derive_new::new;
+
+#[derive(Default, new, Clone, Copy)]
 pub struct Matrix4F {
     mat: [[f32; 4]; 4],
 }
@@ -64,6 +66,29 @@ impl Matrix4F {
                     cos + z * z * (1.0 - cos),
                     0.0,
                 ],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
+        }
+    }
+
+    pub fn new_roation_from_fu(forward: Vector4F, up: Vector4F) -> Self {
+        let f = forward.normalized();
+        let r = up.normalized().cross(f);
+        let u = f.cross(r);
+
+        Self::new_rotation_from_fur(f, u, r)
+    }
+    
+    pub fn new_rotation_from_fur(forward: Vector4F, up: Vector4F, right: Vector4F) -> Self {
+        let f = &forward;
+        let u = &up;
+        let r = &right;
+
+        Self {
+            mat: [
+                [r.x(), r.y(), r.z(), 0.0],
+                [u.x(), u.y(), u.z(), 0.0],
+                [f.x(), f.y(), f.z(), 0.0],
                 [0.0, 0.0, 0.0, 1.0],
             ],
         }

@@ -2,7 +2,9 @@ use std::ops::{self, Add, Index, IndexMut, Mul, Sub};
 
 use derive_new::new;
 
-#[derive(Default, new, Clone, Copy)]
+use crate::quaternion::Quaternion;
+
+#[derive(Debug, Default, new, Clone, Copy)]
 pub struct Vector4F {
     x: f32,
     y: f32,
@@ -81,6 +83,12 @@ impl Vector4F {
                 axis.mul(self.dot(axis.mul(1.0 - cos))),
             ),
         )
+    }
+
+    pub fn rotate_quaternion(&self, rot : Quaternion) -> Self {
+        let conj = rot.conjugate();
+        let w = rot * *self * conj;
+        Vector4F::new(w.x(), w.y(), w.z(), 1.0)
     }
 
     pub fn lerp(&self, dest: Vector4F, factor: f32) -> Self {

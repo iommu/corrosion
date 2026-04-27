@@ -42,6 +42,7 @@ impl Bitmap {
         left: &Edge,
         right: &Edge,
         y: usize,
+        gradients : &Gradients,
         texture: &Bitmap,
         z_buffer: &mut Vec<f32>,
     ) {
@@ -49,11 +50,10 @@ impl Bitmap {
         let x_max = right.x().ceil() as i32;
         let x_pre = x_min as f32 - left.x();
 
-        let x_dist = right.x() - left.x();
-        let tex_coord_xx_step = (right.tex_coord_x() - left.tex_coord_x()) / x_dist;
-        let tex_coord_yx_step = (right.tex_coord_y() - left.tex_coord_y()) / x_dist;
-        let zx_step_inv = (right.z_inv() - left.z_inv()) / x_dist;
-        let depth_x_step = (right.depth() - left.depth()) / x_dist;
+        let tex_coord_xx_step = gradients.tex_coord_xx_step;
+        let tex_coord_yx_step = gradients.tex_coord_yx_step;
+        let zx_step_inv = gradients.zx_step_inv;
+        let depth_x_step = gradients.depth_x_step;
 
         let mut tex_coord_x = left.tex_coord_x() + tex_coord_xx_step * x_pre;
         let mut tex_coord_y = left.tex_coord_y() + tex_coord_yx_step * x_pre;
@@ -83,6 +83,7 @@ impl Bitmap {
         a: &mut Edge,
         b: &mut Edge,
         handedness: bool,
+        gradients: &Gradients,
         texture: &Bitmap,
         z_buffer: &mut Vec<f32>,
     ) {
@@ -95,7 +96,7 @@ impl Bitmap {
         };
 
         for y in y_start..y_end {
-            self.draw_scan_line(left, right, y as usize, texture, z_buffer);
+            self.draw_scan_line(left, right, y as usize, gradients, texture, z_buffer);
             left.step();
             right.step();
         }
@@ -119,6 +120,7 @@ impl Bitmap {
             &mut top_to_bot,
             &mut top_to_mid,
             handedness,
+            &gradients,
             texture,
             z_buffer,
         );
@@ -126,6 +128,7 @@ impl Bitmap {
             &mut top_to_bot,
             &mut mid_to_bot,
             handedness,
+            &gradients,
             texture,
             z_buffer,
         );
