@@ -54,8 +54,6 @@ impl Gradients {
             saturate(max_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
         ];
 
-        println!("normal {:?}", (min_y_vert.normal().dot(light_dir)));
-
         let depth = vec![min_y_vert.pos().z(), mid_y_vert.pos().z(), max_y_vert.pos().z()];
 
         let tex_coord_xx_step =

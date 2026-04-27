@@ -15,7 +15,12 @@ use corrosion::{
     vector::Vector4F,
 };
 
-fn main() -> Result<(), ImageError> {
+fn main() {
+    divan::main();
+}
+
+#[divan::bench(sample_count = 10, args = [0, 100, 500])]
+fn render_scene(iterations : usize) -> Result<(), ImageError> {
     let mut start = Instant::now();
     let mut disp = Display::new([800, 600], "Software rendering".to_owned());
     let mut z_buffer = gen_buffer(&disp.bitmap);
@@ -35,8 +40,6 @@ fn main() -> Result<(), ImageError> {
     let monkey_trans = Transform::from_pos(Vector4F::new(0.0, 0.0, 3.0, 1.0));
     let terrain_trans = Transform::from_pos(Vector4F::new(0.0, -1.0, 0.0, 1.0));
 
-    disp.start();
-
     // let min_y_vert = Vertex::new(
     //     Vector4F::new(-1.0, -1.0, 0.0, 1.0),
     //     Vector4F::new(0.0, 0.0, 0.0, 0.0),
@@ -51,21 +54,8 @@ fn main() -> Result<(), ImageError> {
     // );
 
     //
-
-    let mut rot_count: f32 = 0.0;
-    while disp.run() {
-        let delta = start.elapsed().as_nanos() as f32 / 1_000_000_000.0;
-        start = Instant::now();
-        rot_count += delta;
-
-        //
-
-        disp.drain_inputs(|key| {
-            camera.update(key, delta);
-        });
-
+    for iter in 0..iterations {
         let vp = camera.get_view_projection();
-
         //
         disp.bitmap.fill_pixel(Pixel::BLACK);
         clear_buffer(&mut z_buffer);
@@ -83,18 +73,7 @@ fn main() -> Result<(), ImageError> {
             &texture_2,
             &mut z_buffer,
         );
-        // rctx.fill_tri(
-        //     &mut disp.bitmap,
-        //     min_y_vert.transform(transform),
-        //     mid_y_vert.transform(transform),
-        //     max_y_vert.transform(transform),
-        //     &texture
-        // );
-
-        //
-        disp.update();
     }
-    disp.stop();
 
     Ok(())
 }
