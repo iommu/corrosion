@@ -15,3 +15,12 @@ scene            fastest       │ slowest       │ median        │ mean     
    ├─ 100        512.5 ms      │ 550.6 ms      │ 535.7 ms      │ 534.7 ms      │ 10      │ 10  
    ╰─ 500        2.476 s       │ 2.654 s       │ 2.509 s       │ 2.522 s       │ 10      │ 10  
 
+
+Removed vectors in gradient
+
+Timer precision: 60 ns
+scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters  
+╰─ render_scene                │               │               │               │         │  
+   ├─ 0          13.92 ms      │ 17.04 ms      │ 14.04 ms      │ 14.55 ms      │ 10      │ 10  
+   ├─ 100        500.5 ms      │ 508.8 ms      │ 502.6 ms      │ 503.6 ms      │ 10      │ 10  
+   ╰─ 500        2.451 s       │ 2.578 s       │ 2.478 s       │ 2.492 s       │ 10      │ 10  

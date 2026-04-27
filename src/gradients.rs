@@ -1,16 +1,16 @@
 use crate::{vector::Vector4F, vertex::Vertex};
 
-fn saturate(val : f32) -> f32 {
+fn saturate(val: f32) -> f32 {
     val.max(0.0).min(1.0)
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Gradients {
-    pub tex_coords_x: Vec<f32>,
-    pub tex_coords_y: Vec<f32>,
-    pub z_inv: Vec<f32>,
-    pub depth: Vec<f32>,
-    pub light_amount : Vec<f32>,
+    pub tex_coords_x: [f32; 3],
+    pub tex_coords_y: [f32; 3],
+    pub z_inv: [f32; 3],
+    pub depth: [f32; 3],
+    pub light_amount: [f32; 3],
     pub tex_coord_xx_step: f32,
     pub tex_coord_xy_step: f32,
     pub tex_coord_yx_step: f32,
@@ -19,8 +19,8 @@ pub struct Gradients {
     pub zy_step_inv: f32,
     pub depth_x_step: f32,
     pub depth_y_step: f32,
-    pub light_amount_x_step : f32,
-    pub light_amount_y_step : f32,
+    pub light_amount_x_step: f32,
+    pub light_amount_y_step: f32,
 }
 
 impl Gradients {
@@ -31,30 +31,34 @@ impl Gradients {
 
         let dy_inv = -dx_inv;
 
-        let z_inv = vec![
+        let z_inv = [
             1.0 / min_y_vert.pos().w(),
             1.0 / mid_y_vert.pos().w(),
             1.0 / max_y_vert.pos().w(),
         ];
-        let tex_coords_x = vec![
+        let tex_coords_x = [
             min_y_vert.tex_coords().x() * z_inv[0],
             mid_y_vert.tex_coords().x() * z_inv[1],
             max_y_vert.tex_coords().x() * z_inv[2],
         ];
-        let tex_coords_y = vec![
+        let tex_coords_y = [
             min_y_vert.tex_coords().y() * z_inv[0],
             mid_y_vert.tex_coords().y() * z_inv[1],
             max_y_vert.tex_coords().y() * z_inv[2],
         ];
 
         let light_dir = Vector4F::new(0.0, 0.0, 1.0, 1.0);
-        let light_amount = vec![    
+        let light_amount = [
             saturate(min_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
             saturate(mid_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
             saturate(max_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
         ];
 
-        let depth = vec![min_y_vert.pos().z(), mid_y_vert.pos().z(), max_y_vert.pos().z()];
+        let depth = [
+            min_y_vert.pos().z(),
+            mid_y_vert.pos().z(),
+            max_y_vert.pos().z(),
+        ];
 
         let tex_coord_xx_step =
             Self::calc_x_step(&tex_coords_x, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
@@ -72,8 +76,10 @@ impl Gradients {
         let depth_x_step = Self::calc_x_step(&depth, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
         let depth_y_step = Self::calc_y_step(&depth, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
 
-        let light_amount_x_step = Self::calc_x_step(&light_amount, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
-        let light_amount_y_step = Self::calc_y_step(&light_amount, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
+        let light_amount_x_step =
+            Self::calc_x_step(&light_amount, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
+        let light_amount_y_step =
+            Self::calc_y_step(&light_amount, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
 
         Self {
             tex_coords_x,
@@ -95,7 +101,7 @@ impl Gradients {
     }
 
     fn calc_x_step(
-        values: &Vec<f32>,
+        values: &[f32; 3],
         min_y_vert: &Vertex,
         mid_y_vert: &Vertex,
         max_y_vert: &Vertex,
@@ -107,7 +113,7 @@ impl Gradients {
     }
 
     fn calc_y_step(
-        values: &Vec<f32>,
+        values: &[f32; 3],
         min_y_vert: &Vertex,
         mid_y_vert: &Vertex,
         max_y_vert: &Vertex,
