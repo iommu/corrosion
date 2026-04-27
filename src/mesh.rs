@@ -21,7 +21,11 @@ impl Mesh {
         let mut vertices: Vec<Vertex> = vec![];
 
         for idx in 0..model.positions().len() {
-            vertices.push(Vertex::new(model.positions()[idx], model.tex_coords()[idx]));
+            vertices.push(Vertex::new(
+                model.positions()[idx],
+                model.tex_coords()[idx],
+                model.normals()[idx],
+            ));
         }
 
         Ok(Self {

@@ -14,6 +14,8 @@ pub struct Edge {
     z_step_inv: f32,
     depth : f32, 
     depth_step : f32,
+    light_amount : f32, 
+    light_amount_step : f32,
 }
 
 impl Edge {
@@ -53,6 +55,10 @@ impl Edge {
         let depth = gradients.depth[min_y_vert_idx] + gradients.depth_x_step * x_pre + gradients.depth_y_step * y_pre;
         let depth_step = gradients.depth_y_step + gradients.depth_x_step * x_step;
 
+        let light_amount = gradients.light_amount[min_y_vert_idx] + gradients.light_amount_x_step * x_pre + gradients.light_amount_y_step * y_pre;
+        let light_amount_step = gradients.light_amount_y_step + gradients.light_amount_x_step * x_step;
+        
+
         Self {
             x,
             x_step,
@@ -66,6 +72,8 @@ impl Edge {
             z_step_inv,
             depth,
             depth_step,
+            light_amount,
+            light_amount_step,
         }
     }
 
@@ -101,10 +109,16 @@ impl Edge {
         self.depth
     }
 
+    pub fn light_amount(&self) -> f32 {
+        self.light_amount
+    }
+
     pub fn step(&mut self) {
         self.x += self.x_step;
         self.tex_coord_x += self.tex_coord_x_step;
         self.tex_coord_y += self.tex_coord_y_step;
-        self.z_inv += self.z_step_inv
+        self.z_inv += self.z_step_inv;
+        self.depth += self.depth_step;
+        self.light_amount += self.light_amount_step;
     }
 }

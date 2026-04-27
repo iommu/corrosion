@@ -49,7 +49,7 @@ fn main() -> Result<(), ImageError> {
     let texture_1 = Bitmap::new_from_file("res/bricks2.jpg")?;
     let texture_2 = Bitmap::new_from_file("res/bricks.jpg")?;
 
-    let monkey_mesh = Mesh::new_from_obj_file("res/monkey2.obj")?;
+    let monkey_mesh = Mesh::new_from_obj_file("res/smoothMonkey0.obj")?;
     let terrain_mesh = Mesh::new_from_obj_file("res/terrain2.obj")?;
 
     let monkey_trans = Transform::from_pos(Vector4F::new(0.0, 0.0, 3.0, 1.0));
@@ -91,13 +91,15 @@ fn main() -> Result<(), ImageError> {
         clear_buffer(&mut z_buffer);
         disp.bitmap.draw_mesh(
             &monkey_mesh,
-            &(vp * monkey_trans.transformation()),
+            &vp,
+            &monkey_trans.transformation(),
             &texture_1,
             &mut z_buffer,
         );
         disp.bitmap.draw_mesh(
             &terrain_mesh,
-            &(vp * terrain_trans.transformation()),
+            &vp,
+            &terrain_trans.transformation(),
             &texture_2,
             &mut z_buffer,
         );

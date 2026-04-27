@@ -22,15 +22,17 @@ impl Bitmap {
     pub fn draw_mesh(
         &mut self,
         mesh: &Mesh,
+        view_projection: &Matrix4F,
         transform: &Matrix4F,
         texture: &Bitmap,
         z_buffer: &mut Vec<f32>,
     ) {
+        let mvp = *view_projection * *transform;
         for chunk in mesh.indices().chunks_exact(3) {
             self.draw_tri(
-                &mesh.vertices()[chunk[0] as usize].transform(transform),
-                &mesh.vertices()[chunk[1] as usize].transform(transform),
-                &mesh.vertices()[chunk[2] as usize].transform(transform),
+                &mesh.vertices()[chunk[0] as usize].transform(&mvp, transform),
+                &mesh.vertices()[chunk[1] as usize].transform(&mvp, transform),
+                &mesh.vertices()[chunk[2] as usize].transform(&mvp, transform),
                 texture,
                 z_buffer,
             );
@@ -54,11 +56,13 @@ impl Bitmap {
         let tex_coord_yx_step = gradients.tex_coord_yx_step;
         let zx_step_inv = gradients.zx_step_inv;
         let depth_x_step = gradients.depth_x_step;
+        let light_amount_step = gradients.light_amount_x_step * x_pre;
 
         let mut tex_coord_x = left.tex_coord_x() + tex_coord_xx_step * x_pre;
         let mut tex_coord_y = left.tex_coord_y() + tex_coord_yx_step * x_pre;
         let mut z_inv = left.z_inv() + zx_step_inv * x_pre;
         let mut depth = left.depth() + depth_x_step * x_pre;
+        let mut light_amount = left.light_amount() + light_amount_step * x_pre;
 
         for x in x_min..x_max {
             let index = x as usize + y * self.size()[0];
@@ -67,7 +71,7 @@ impl Bitmap {
                 let z = 1.0 / z_inv;
                 let x_src = ((tex_coord_x * z) * (texture.size()[0] - 1) as f32 + 0.5) as usize;
                 let y_src = ((tex_coord_y * z) * (texture.size()[1] - 1) as f32 + 0.5) as usize;
-                self.copy_pixel(x as usize, y, x_src, y_src, texture);
+                self.copy_pixel(x as usize, y, x_src, y_src, texture, light_amount);
             }
 
             //
@@ -75,6 +79,7 @@ impl Bitmap {
             tex_coord_y += tex_coord_yx_step;
             z_inv += zx_step_inv;
             depth += depth_x_step;
+            light_amount += light_amount_step;
         }
     }
 
@@ -234,9 +239,12 @@ impl Bitmap {
     ) {
         let ss_transform =
             Matrix4F::new_ss_transform(self.width() as f32 / 2.0, self.height() as f32 / 2.0);
-        let min_y_vert = &mut vert_1.transform(&ss_transform).perspective_div();
-        let mid_y_vert = &mut vert_2.transform(&ss_transform).perspective_div();
-        let max_y_vert = &mut vert_3.transform(&ss_transform).perspective_div();
+       
+        let identity = Matrix4F::new_identity();
+
+        let min_y_vert = &mut vert_1.transform(&ss_transform, &identity).perspective_div();
+        let mid_y_vert = &mut vert_2.transform(&ss_transform, &identity).perspective_div();
+        let max_y_vert = &mut vert_3.transform(&ss_transform, &identity).perspective_div();
 
         if min_y_vert.tri_area(max_y_vert, mid_y_vert) >= 0.0 {
             return;

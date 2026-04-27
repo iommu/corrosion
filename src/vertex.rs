@@ -6,17 +6,23 @@ use crate::{matrix::Matrix4F, vector::Vector4F};
 pub struct Vertex {
     pos: Vector4F,
     tex_coords: Vector4F,
+    normal: Vector4F,
 }
 
 impl Vertex {
-    pub fn new(pos: Vector4F, tex_coords: Vector4F) -> Self {
-        Self { pos, tex_coords }
+    pub fn new(pos: Vector4F, tex_coords: Vector4F, normal: Vector4F) -> Self {
+        Self {
+            pos,
+            tex_coords,
+            normal,
+        }
     }
 
     pub fn lerp(&self, rhs: Self, factor: f32) -> Self {
         Self {
             pos: self.pos.lerp(rhs.pos, factor),
             tex_coords: self.tex_coords.lerp(rhs.tex_coords, factor),
+            normal: self.normal.lerp(rhs.normal(), factor)
         }
     }
 
@@ -26,6 +32,10 @@ impl Vertex {
 
     pub fn tex_coords(&self) -> Vector4F {
         self.tex_coords
+    }
+
+    pub fn normal(&self) -> Vector4F {
+        self.normal
     }
 
     pub fn x(&self) -> f32 {
@@ -60,8 +70,13 @@ impl Vertex {
         self.pos.w_mut()
     }
 
-    pub fn transform(&self, transform: &Matrix4F) -> Self {
-        Self::new(transform.transform(self.pos), self.tex_coords)
+    pub fn transform(&self, transform: &Matrix4F, normal_transform: &Matrix4F) -> Self {
+        // Normaliztion is important for scaling
+        Self::new(
+            transform.transform(self.pos),
+            self.tex_coords,
+            normal_transform.transform(self.normal).normalized(),
+        )
     }
 
     pub fn perspective_div(&self) -> Self {
@@ -73,6 +88,7 @@ impl Vertex {
                 self.pos.w(), // sneaky storage
             ),
             self.tex_coords,
+            self.normal,
         )
     }
 

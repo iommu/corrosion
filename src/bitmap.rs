@@ -22,7 +22,7 @@ impl Bitmap {
         }
     }
 
-    pub fn new_from_file<P : AsRef<Path>>(path: P) -> Result<Self, ImageError> {
+    pub fn new_from_file<P: AsRef<Path>>(path: P) -> Result<Self, ImageError> {
         let img = ImageReader::open(path)?.decode()?;
         Ok(Self::new_from_img(img))
     }
@@ -64,9 +64,15 @@ impl Bitmap {
         x_src: usize,
         y_src: usize,
         bitmap: &Bitmap,
+        light_amount: f32,
     ) {
-        self.components[y_dest * self.size[0] + x_dest] =
-            bitmap.components[y_src * bitmap.size[0] + x_src];
+        let unlit = bitmap.components[y_src * bitmap.size[0] + x_src];
+        self.components[y_dest * self.size[0] + x_dest] = [
+            (unlit[0] as f32 * light_amount) as u8,
+            (unlit[1] as f32 * light_amount) as u8,
+            (unlit[2] as f32 * light_amount) as u8,
+            unlit[3],
+        ];
     }
 
     pub fn get_buffer(&mut self) -> &[u8] {
