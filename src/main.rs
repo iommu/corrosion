@@ -1,7 +1,6 @@
-use std::{ops::Mul, time::Instant};
+use std::time::Instant;
 
 use image::ImageError;
-use rand::RngExt;
 
 use crate::{
     bitmap::Bitmap,
@@ -11,10 +10,9 @@ use crate::{
     mesh::Mesh,
     pixel::Pixel,
     render_ctx::{clear_buffer, gen_buffer},
-    stars3D::Stars3D,
+    stars_3d::Stars3D,
     transform::Transform,
     vector::Vector4F,
-    vertex::Vertex,
 };
 
 mod bitmap;
@@ -23,14 +21,13 @@ mod display;
 mod edge;
 mod gradients;
 mod indexed_model;
-mod input;
 mod matrix;
 mod mesh;
 mod obj_loader;
 mod pixel;
 mod quaternion;
 mod render_ctx;
-mod stars3D;
+mod stars_3d;
 mod transform;
 mod vector;
 mod vertex;

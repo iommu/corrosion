@@ -1,13 +1,7 @@
 use std::{mem::swap, usize, vec};
 
 use crate::{
-    bitmap::Bitmap,
-    edge::Edge,
-    gradients::{self, Gradients},
-    matrix::Matrix4F,
-    mesh::Mesh,
-    pixel::Pixel,
-    vertex::Vertex,
+    bitmap::Bitmap, edge::Edge, gradients::Gradients, matrix::Matrix4F, mesh::Mesh, vertex::Vertex,
 };
 
 pub fn gen_buffer(buffer: &Bitmap) -> Vec<f32> {
@@ -44,7 +38,7 @@ impl Bitmap {
         left: &Edge,
         right: &Edge,
         y: usize,
-        gradients : &Gradients,
+        gradients: &Gradients,
         texture: &Bitmap,
         z_buffer: &mut Vec<f32>,
     ) {
@@ -239,7 +233,7 @@ impl Bitmap {
     ) {
         let ss_transform =
             Matrix4F::new_ss_transform(self.width() as f32 / 2.0, self.height() as f32 / 2.0);
-       
+
         let identity = Matrix4F::new_identity();
 
         let min_y_vert = &mut vert_1.transform(&ss_transform, &identity).perspective_div();

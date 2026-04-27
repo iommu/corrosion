@@ -17,7 +17,7 @@ impl Stars3D {
             spread,
             speed,
             num_stars,
-            half_tan_fov : (70.0 as f32 /2.0).to_radians().tan(),
+            half_tan_fov: (70.0 as f32 / 2.0).to_radians().tan(),
             stars_x: vec![0.0; num_stars],
             stars_y: vec![0.0; num_stars],
             stars_z: vec![0.0; num_stars],
@@ -27,7 +27,7 @@ impl Stars3D {
             obj.init_star(index);
         }
 
-        return  obj;
+        return obj;
     }
 
     fn init_star(&mut self, index: usize) {
@@ -49,8 +49,11 @@ impl Stars3D {
                 self.init_star(index);
             }
 
-            let x = ((self.stars_x[index]/(self.stars_z[index] * self.half_tan_fov))  * half_width + half_width) as i64;
-            let y = ((self.stars_y[index]/(self.stars_z[index] * self.half_tan_fov)) * half_height + half_height) as i64;
+            let x = ((self.stars_x[index] / (self.stars_z[index] * self.half_tan_fov)) * half_width
+                + half_width) as i64;
+            let y = ((self.stars_y[index] / (self.stars_z[index] * self.half_tan_fov))
+                * half_height
+                + half_height) as i64;
 
             if (x < 0 || x >= target.width() as i64) || (y < 0 || y >= target.height() as i64) {
                 self.init_star(index);

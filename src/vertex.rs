@@ -1,11 +1,15 @@
+use getset::{Getters, MutGetters};
 use std::ops::{Index, IndexMut};
 
 use crate::{matrix::Matrix4F, vector::Vector4F};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Getters, MutGetters)]
 pub struct Vertex {
+    #[getset(get = "pub", get_mut = "pub")]
     pos: Vector4F,
+    #[getset(get = "pub", get_mut = "pub")]
     tex_coords: Vector4F,
+    #[getset(get = "pub", get_mut = "pub")]
     normal: Vector4F,
 }
 
@@ -22,52 +26,24 @@ impl Vertex {
         Self {
             pos: self.pos.lerp(rhs.pos, factor),
             tex_coords: self.tex_coords.lerp(rhs.tex_coords, factor),
-            normal: self.normal.lerp(rhs.normal(), factor)
+            normal: self.normal.lerp(*rhs.normal(), factor),
         }
-    }
-
-    pub fn pos(&self) -> Vector4F {
-        self.pos
-    }
-
-    pub fn tex_coords(&self) -> Vector4F {
-        self.tex_coords
-    }
-
-    pub fn normal(&self) -> Vector4F {
-        self.normal
     }
 
     pub fn x(&self) -> f32 {
         self.pos.x()
     }
 
-    pub fn x_mut(&mut self) -> &mut f32 {
-        self.pos.x_mut()
-    }
-
     pub fn y(&self) -> f32 {
         self.pos.y()
-    }
-
-    pub fn y_mut(&mut self) -> &mut f32 {
-        self.pos.y_mut()
     }
 
     pub fn z(&self) -> f32 {
         self.pos.z()
     }
 
-    pub fn z_mut(&mut self) -> &mut f32 {
-        self.pos.z_mut()
-    }
-
     pub fn w(&self) -> f32 {
         self.pos.w()
-    }
-
-    pub fn w_mut(&mut self) -> &mut f32 {
-        self.pos.w_mut()
     }
 
     pub fn transform(&self, transform: &Matrix4F, normal_transform: &Matrix4F) -> Self {
@@ -93,10 +69,10 @@ impl Vertex {
     }
 
     pub fn tri_area(&self, vert_b: &Vertex, vert_c: &Vertex) -> f32 {
-        let x_1 = vert_b.x() - self.x();
-        let y_1 = vert_b.y() - self.y();
-        let x_2 = vert_c.x() - self.x();
-        let y_2 = vert_c.y() - self.y();
+        let x_1 = vert_b.pos.x() - self.pos.x();
+        let y_1 = vert_b.pos.y() - self.pos.y();
+        let x_2 = vert_c.pos.x() - self.pos.x();
+        let y_2 = vert_c.pos.y() - self.pos.y();
 
         // 2D cross product
         return ((x_1 * y_2) - (x_2 * y_1)) / 2.0;

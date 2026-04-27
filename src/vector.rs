@@ -1,14 +1,19 @@
 use std::ops::{self, Add, Index, IndexMut, Mul, Sub};
 
 use derive_new::new;
+use getset::MutGetters;
 
 use crate::quaternion::Quaternion;
 
-#[derive(Debug, Default, new, Clone, Copy)]
+#[derive(Debug, Default, new, Clone, Copy, MutGetters)]
 pub struct Vector4F {
+    #[getset(get_mut = "pub")]
     x: f32,
+    #[getset(get_mut = "pub")]
     y: f32,
+    #[getset(get_mut = "pub")]
     z: f32,
+    #[getset(get_mut = "pub")]
     w: f32,
 }
 
@@ -17,32 +22,16 @@ impl Vector4F {
         self.x
     }
 
-    pub fn x_mut(&mut self) -> &mut f32 {
-        &mut self.x
-    }
-
     pub fn y(&self) -> f32 {
         self.y
-    }
-
-    pub fn y_mut(&mut self) -> &mut f32 {
-        &mut self.y
     }
 
     pub fn z(&self) -> f32 {
         self.z
     }
 
-    pub fn z_mut(&mut self) -> &mut f32 {
-        &mut self.z
-    }
-
     pub fn w(&self) -> f32 {
         self.w
-    }
-
-    pub fn w_mut(&mut self) -> &mut f32 {
-        &mut self.w
     }
 
     pub fn len(&self) -> f32 {
@@ -85,7 +74,7 @@ impl Vector4F {
         )
     }
 
-    pub fn rotate_quaternion(&self, rot : Quaternion) -> Self {
+    pub fn rotate_quaternion(&self, rot: Quaternion) -> Self {
         let conj = rot.conjugate();
         let w = rot * *self * conj;
         Vector4F::new(w.x(), w.y(), w.z(), 1.0)
@@ -221,7 +210,6 @@ impl PartialEq for Vector4F {
     }
 }
 
-
 // Indexing
 
 impl Index<usize> for Vector4F {
@@ -232,7 +220,7 @@ impl Index<usize> for Vector4F {
             1 => &self.y,
             2 => &self.z,
             3 => &self.w,
-            _ => panic!("Index out of bounds")
+            _ => panic!("Index out of bounds"),
         }
     }
 }
@@ -244,7 +232,7 @@ impl IndexMut<usize> for Vector4F {
             1 => &mut self.y,
             2 => &mut self.z,
             3 => &mut self.w,
-            _ => panic!("Index out of bounds")
+            _ => panic!("Index out of bounds"),
         }
     }
 }

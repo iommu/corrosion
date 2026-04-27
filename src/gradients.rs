@@ -1,6 +1,6 @@
 use crate::{vector::Vector4F, vertex::Vertex};
 
-fn saturate(val: f32) -> f32 {
+fn saturate(val : f32) -> f32 {
     val.max(0.0).min(1.0)
 }
 
@@ -10,7 +10,7 @@ pub struct Gradients {
     pub tex_coords_y: Vec<f32>,
     pub z_inv: Vec<f32>,
     pub depth: Vec<f32>,
-    pub light_amount: Vec<f32>,
+    pub light_amount : Vec<f32>,
     pub tex_coord_xx_step: f32,
     pub tex_coord_xy_step: f32,
     pub tex_coord_yx_step: f32,
@@ -19,8 +19,8 @@ pub struct Gradients {
     pub zy_step_inv: f32,
     pub depth_x_step: f32,
     pub depth_y_step: f32,
-    pub light_amount_x_step: f32,
-    pub light_amount_y_step: f32,
+    pub light_amount_x_step : f32,
+    pub light_amount_y_step : f32,
 }
 
 impl Gradients {
@@ -48,17 +48,15 @@ impl Gradients {
         ];
 
         let light_dir = Vector4F::new(0.0, 0.0, 1.0, 1.0);
-        let light_amount = vec![
+        let light_amount = vec![    
             saturate(min_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
             saturate(mid_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
             saturate(max_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
         ];
 
-        let depth = vec![
-            min_y_vert.pos().z(),
-            mid_y_vert.pos().z(),
-            max_y_vert.pos().z(),
-        ];
+        println!("normal {:?}", (min_y_vert.normal().dot(light_dir)));
+
+        let depth = vec![min_y_vert.pos().z(), mid_y_vert.pos().z(), max_y_vert.pos().z()];
 
         let tex_coord_xx_step =
             Self::calc_x_step(&tex_coords_x, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
@@ -76,10 +74,8 @@ impl Gradients {
         let depth_x_step = Self::calc_x_step(&depth, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
         let depth_y_step = Self::calc_y_step(&depth, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
 
-        let light_amount_x_step =
-            Self::calc_x_step(&light_amount, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
-        let light_amount_y_step =
-            Self::calc_y_step(&light_amount, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
+        let light_amount_x_step = Self::calc_x_step(&light_amount, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
+        let light_amount_y_step = Self::calc_y_step(&light_amount, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
 
         Self {
             tex_coords_x,

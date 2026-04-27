@@ -1,55 +1,21 @@
 use crate::vector::Vector4F;
+use getset::{Getters, MutGetters};
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Getters, MutGetters)]
 pub struct IndexedModel {
+    #[getset(get = "pub", get_mut = "pub")]
     positions: Vec<Vector4F>,
+    #[getset(get = "pub", get_mut = "pub")]
     tex_coords: Vec<Vector4F>,
+    #[getset(get = "pub", get_mut = "pub")]
     normals: Vec<Vector4F>,
+    #[getset(get = "pub", get_mut = "pub")]
     tangents: Vec<Vector4F>,
+    #[getset(get = "pub", get_mut = "pub")]
     indices: Vec<i32>,
 }
 
 impl IndexedModel {
-    pub fn positions(&self) -> &Vec<Vector4F> {
-        &self.positions
-    }
-
-    pub fn positions_mut(&mut self) -> &mut Vec<Vector4F> {
-        &mut self.positions
-    }
-
-    pub fn tex_coords(&self) -> &Vec<Vector4F> {
-        &self.tex_coords
-    }
-
-    pub fn tex_coords_mut(&mut self) -> &mut Vec<Vector4F> {
-        &mut self.tex_coords
-    }
-
-    pub fn normals(&self) -> &Vec<Vector4F> {
-        &self.normals
-    }
-
-     pub fn normals_mut(&mut self) -> &mut Vec<Vector4F> {
-        &mut self.normals
-    }
-
-    pub fn tangents(&self) -> &Vec<Vector4F> {
-        &self.tangents
-    }
-
-    pub fn tangents_mut(&mut self) -> &mut Vec<Vector4F> {
-        &mut self.tangents
-    }
-
-    pub fn indices(&self) -> &Vec<i32> {
-        &self.indices
-    }
-
-    pub fn indices_mut(&mut self) -> &mut Vec<i32> {
-        &mut self.indices
-    }
-
     pub fn calc_normals(&mut self) {
         for idx in (0..self.indices.len()).step_by(3) {
             let i_0 = self.indices[idx + 0] as usize;
@@ -80,18 +46,18 @@ impl IndexedModel {
             let edge_1 = self.positions[i_1] - self.positions[i_0];
             let edge_2 = self.positions[i_2] - self.positions[i_0];
 
-            let delta_U_1 = self.tex_coords[i_1].x() - self.tex_coords[i_0].x();
-            let delta_V_1 = self.tex_coords[i_1].y() - self.tex_coords[i_0].y();
-            let delta_U_2 = self.tex_coords[i_2].x() - self.tex_coords[i_0].x();
-            let delta_V_2 = self.tex_coords[i_2].y() - self.tex_coords[i_0].y();
+            let delta_u_1 = self.tex_coords[i_1].x() - self.tex_coords[i_0].x();
+            let delta_v_1 = self.tex_coords[i_1].y() - self.tex_coords[i_0].y();
+            let delta_u_2 = self.tex_coords[i_2].x() - self.tex_coords[i_0].x();
+            let delta_v_2 = self.tex_coords[i_2].y() - self.tex_coords[i_0].y();
 
-            let dividend = (delta_U_1 * delta_V_2 - delta_U_2 * delta_V_1);
+            let dividend = (delta_u_1 * delta_v_2 - delta_u_2 * delta_v_1);
             let f = if dividend == 0.0 { 0.0 } else { 1.0 / dividend };
 
             let tangent = Vector4F::new(
-                f * (delta_V_2 * edge_1.x() - delta_V_1 * edge_2.x()),
-                f * (delta_V_2 * edge_1.y() - delta_V_1 * edge_2.y()),
-                f * (delta_V_2 * edge_1.z() - delta_V_1 * edge_2.z()),
+                f * (delta_v_2 * edge_1.x() - delta_v_1 * edge_2.x()),
+                f * (delta_v_2 * edge_1.y() - delta_v_1 * edge_2.y()),
+                f * (delta_v_2 * edge_1.z() - delta_v_1 * edge_2.z()),
                 0.0,
             );
 

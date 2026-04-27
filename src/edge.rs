@@ -1,4 +1,4 @@
-use crate::{gradients::Gradients, vector::Vector4F, vertex::Vertex};
+use crate::{gradients::Gradients, vertex::Vertex};
 
 #[derive(Clone, Copy)]
 pub struct Edge {
@@ -12,10 +12,10 @@ pub struct Edge {
     tex_coord_y_step: f32,
     z_inv: f32,
     z_step_inv: f32,
-    depth : f32, 
-    depth_step : f32,
-    light_amount : f32, 
-    light_amount_step : f32,
+    depth: f32,
+    depth_step: f32,
+    light_amount: f32,
+    light_amount_step: f32,
 }
 
 impl Edge {
@@ -52,12 +52,16 @@ impl Edge {
             + gradients.zy_step_inv * y_pre;
         let z_step_inv = gradients.zy_step_inv + gradients.zx_step_inv * x_step;
 
-        let depth = gradients.depth[min_y_vert_idx] + gradients.depth_x_step * x_pre + gradients.depth_y_step * y_pre;
+        let depth = gradients.depth[min_y_vert_idx]
+            + gradients.depth_x_step * x_pre
+            + gradients.depth_y_step * y_pre;
         let depth_step = gradients.depth_y_step + gradients.depth_x_step * x_step;
 
-        let light_amount = gradients.light_amount[min_y_vert_idx] + gradients.light_amount_x_step * x_pre + gradients.light_amount_y_step * y_pre;
-        let light_amount_step = gradients.light_amount_y_step + gradients.light_amount_x_step * x_step;
-        
+        let light_amount = gradients.light_amount[min_y_vert_idx]
+            + gradients.light_amount_x_step * x_pre
+            + gradients.light_amount_y_step * y_pre;
+        let light_amount_step =
+            gradients.light_amount_y_step + gradients.light_amount_x_step * x_step;
 
         Self {
             x,
@@ -79,10 +83,6 @@ impl Edge {
 
     pub fn x(&self) -> f32 {
         self.x
-    }
-
-    pub fn x_step(&self) -> f32 {
-        self.x_step
     }
 
     pub fn y_start(&self) -> i32 {

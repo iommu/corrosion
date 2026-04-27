@@ -1,21 +1,17 @@
 use std::{io, path::Path};
+use getset::{Getters, MutGetters};
 
 use crate::{bitmap::Bitmap, obj_loader::OBJModel, vertex::Vertex};
 
+#[derive(Clone, Getters, MutGetters)]
 pub struct Mesh {
+    #[getset(get = "pub", get_mut = "pub")]
     vertices: Vec<Vertex>,
+    #[getset(get = "pub", get_mut = "pub")]
     indices: Vec<i32>,
 }
 
 impl Mesh {
-    pub fn vertices(&self) -> &Vec<Vertex> {
-        &self.vertices
-    }
-
-    pub fn indices(&self) -> &Vec<i32> {
-        &self.indices
-    }
-
     pub fn new_from_obj_file<P: AsRef<Path>>(path: P) -> io::Result<Self> {
         let model = OBJModel::new_from_file(path)?.to_indexedmodel();
         let mut vertices: Vec<Vertex> = vec![];

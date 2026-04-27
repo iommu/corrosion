@@ -29,7 +29,7 @@ impl Camera {
         const KEY_S: Key = Key::from_char('s');
         const KEY_D: Key = Key::from_char('d');
 
-        let Y_AXIS = Vector4F::new(0.0, 1.0, 0.0, 1.0);
+        let y_axis = Vector4F::new(0.0, 1.0, 0.0, 1.0);
 
         // Speed and rotation amounts are hardcoded here.
         // In a more general system, you might want to have them as variables.
@@ -54,10 +54,10 @@ impl Camera {
                 self.reposition(self.transform.rot().right(), move_amount);
             }
             Key::Right => {
-                self.rotate(Y_AXIS, sens_x);
+                self.rotate(y_axis, sens_x);
             }
             Key::Left => {
-                self.rotate(Y_AXIS, -sens_x);
+                self.rotate(y_axis, -sens_x);
             }
             Key::Up => {
                 self.rotate(self.transform.rot().right(), -sens_y);

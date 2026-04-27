@@ -1,7 +1,7 @@
 use getset::{Getters, MutGetters};
 use std::ops::{Add, Div, Mul, Sub};
 
-use crate::{matrix::Matrix4F, quaternion, vector::Vector4F};
+use crate::{matrix::Matrix4F, vector::Vector4F};
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Quaternion(Vector4F);

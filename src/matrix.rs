@@ -78,7 +78,7 @@ impl Matrix4F {
 
         Self::new_rotation_from_fur(f, u, r)
     }
-    
+
     pub fn new_rotation_from_fur(forward: Vector4F, up: Vector4F, right: Vector4F) -> Self {
         let f = &forward;
         let u = &up;

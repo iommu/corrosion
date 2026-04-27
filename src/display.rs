@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, sync::{Arc, mpsc::{Receiver, channel}}};
+use std::sync::mpsc::{Receiver, channel};
 
 use fltk::{
     app::{self, App},
@@ -13,7 +13,7 @@ use crate::bitmap::Bitmap;
 pub struct Display {
     pub size: [usize; 2],
     pub bitmap: Bitmap,
-    pub inputs : Receiver<Key>,
+    pub inputs: Receiver<Key>,
     app: App,
     window: DoubleWindow,
     frame: Frame,
@@ -28,7 +28,7 @@ impl Display {
         let mut obj = Self {
             size,
             bitmap,
-            inputs : rx,
+            inputs: rx,
             app: app::App::default(),
             window: Window::default()
                 .with_size(width, height)

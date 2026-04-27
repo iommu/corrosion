@@ -1,9 +1,6 @@
 // Todo : use generics
 
-use std::{
-    io::{self, BufRead, Read, Seek},
-    path::Path,
-};
+use std::path::Path;
 
 use image::{DynamicImage, GenericImageView, ImageError, ImageReader};
 

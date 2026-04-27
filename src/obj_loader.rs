@@ -1,12 +1,11 @@
 use crate::{indexed_model::IndexedModel, vector::Vector4F};
 
 use std::{
-    collections::{HashMap, hash_map},
+    collections::HashMap,
     fs::File,
     hash::Hash,
     io::{self, BufRead, BufReader},
     path::Path,
-    str::FromStr,
 };
 
 #[derive(Hash, Clone, Copy)]
@@ -39,14 +38,6 @@ pub struct OBJModel {
 }
 
 impl OBJModel {
-    pub fn positions(&self) -> &Vec<Vector4F> {
-        &self.positions
-    }
-
-    pub fn tex_coords(&self) -> &Vec<Vector4F> {
-        &self.tex_coords
-    }
-
     fn strings_rm_empty(str: &mut Vec<&str>) {
         str.retain(|s| !s.is_empty());
     }
@@ -121,9 +112,9 @@ impl OBJModel {
                     for index in 0..tokens.len().saturating_sub(3) {
                         let idx = mdl.idx_from_str(tokens[1])?;
                         mdl.indices.push(idx);
-                        let idx = mdl.idx_from_str(tokens[2+index])?;
+                        let idx = mdl.idx_from_str(tokens[2 + index])?;
                         mdl.indices.push(idx);
-                        let idx = mdl.idx_from_str(tokens[3+index])?;
+                        let idx = mdl.idx_from_str(tokens[3 + index])?;
                         mdl.indices.push(idx);
                     }
                 }
