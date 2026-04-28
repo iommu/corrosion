@@ -6,48 +6,67 @@ A rust follow along of thebenybox's 3D Software Rendering Tutorial [link](https:
 
 Built for debugging with LLDB with vscodium (vadimcn.vscode-lldb)
 
+# Building
+
+## Native
+
+```bash
+cargo run
+```
+
 # Benchmark
 
-Timer precision: 40 ns
-scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters  
-╰─ render_scene                │               │               │               │         │  
-   ├─ 0          14.19 ms      │ 21.57 ms      │ 14.31 ms      │ 15.28 ms      │ 10      │ 10  
-   ├─ 100        512.5 ms      │ 550.6 ms      │ 535.7 ms      │ 534.7 ms      │ 10      │ 10  
-   ╰─ 500        2.476 s       │ 2.654 s       │ 2.509 s       │ 2.522 s       │ 10      │ 10  
+Ran with
+
+```bash
+cargo bench --features bench
+```
+
+## Baseline
+**Timer precision:** 40 ns
+
+| Scene | Fastest | Slowest | Median | Mean | Samples | Iters |
+|-------|--------:|--------:|-------:|-----:|--------:|------:|
+| 0     | 14.19 ms | 21.57 ms | 14.31 ms | 15.28 ms | 10 | 10 |
+| 100   | 512.5 ms | 550.6 ms | 535.7 ms | 534.7 ms | 10 | 10 |
+| 500   | 2.476 s  | 2.654 s  | 2.509 s  | 2.522 s  | 10 | 10 |
 
 
-Removed vectors in gradient
+## Removed vectors in gradient
+**Timer precision:** 60 ns
 
-Timer precision: 60 ns
-scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters  
-╰─ render_scene                │               │               │               │         │  
-   ├─ 0          13.92 ms      │ 17.04 ms      │ 14.04 ms      │ 14.55 ms      │ 10      │ 10  
-   ├─ 100        500.5 ms      │ 508.8 ms      │ 502.6 ms      │ 503.6 ms      │ 10      │ 10  
-   ╰─ 500        2.451 s       │ 2.578 s       │ 2.478 s       │ 2.492 s       │ 10      │ 10  
+| Scene | Fastest | Slowest | Median | Mean | Samples | Iters |
+|-------|--------:|--------:|-------:|-----:|--------:|------:|
+| 0     | 13.92 ms | 17.04 ms | 14.04 ms | 14.55 ms | 10 | 10 |
+| 100   | 500.5 ms | 508.8 ms | 502.6 ms | 503.6 ms | 10 | 10 |
+| 500   | 2.451 s  | 2.578 s  | 2.478 s  | 2.492 s  | 10 | 10 |
 
-Moved from fltk to macroquad
 
-Timer precision: 20 ns
-scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters  
-╰─ render_scene                │               │               │               │         │  
-   ├─ 0          15.74 ms      │ 17.56 ms      │ 16.08 ms      │ 16.26 ms      │ 10      │ 10  
-   ├─ 100        431.6 ms      │ 449.3 ms      │ 438 ms        │ 438.6 ms      │ 10      │ 10  
-   ╰─ 500        2.101 s       │ 2.14 s        │ 2.104 s       │ 2.108 s       │ 10      │ 10  
+## Moved from fltk to macroquad
+**Timer precision:** 20 ns
 
-Cleaner to read Gradient struct
+| Scene | Fastest | Slowest | Median | Mean | Samples | Iters |
+|-------|--------:|--------:|-------:|-----:|--------:|------:|
+| 0     | 15.74 ms | 17.56 ms | 16.08 ms | 16.26 ms | 10 | 10 |
+| 100   | 431.6 ms | 449.3 ms | 438 ms   | 438.6 ms | 10 | 10 |
+| 500   | 2.101 s  | 2.14 s   | 2.104 s  | 2.108 s  | 10 | 10 |
 
-Timer precision: 40 ns  
-scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters  
-╰─ render_scene                │               │               │               │         │  
-   ├─ 0          16 ms         │ 29.62 ms      │ 16.17 ms      │ 17.5 ms       │ 10      │ 10  
-   ├─ 100        439.5 ms      │ 445 ms        │ 443.4 ms      │ 442.9 ms      │ 10      │ 10  
-   ╰─ 500        2.091 s       │ 2.169 s       │ 2.147 s       │ 2.134 s       │ 10      │ 10  
 
-Removed excess float multiplication / conversions
+## cleaner gradient struct
+**Timer precision:** 40 ns
 
-Timer precision: 20 ns  
-scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters  
-╰─ render_scene                │               │               │               │         │  
-   ├─ 0          15.6 ms       │ 16.77 ms      │ 15.94 ms      │ 15.99 ms      │ 10      │ 10  
-   ├─ 100        361.7 ms      │ 372.3 ms      │ 367.5 ms      │ 367.6 ms      │ 10      │ 10  
-   ╰─ 500        1.729 s       │ 1.806 s       │ 1.776 s       │ 1.772 s       │ 10      │ 10  
+| Scene | Fastest | Slowest | Median | Mean | Samples | Iters |
+|-------|--------:|--------:|-------:|-----:|--------:|------:|
+| 0     | 16 ms    | 29.62 ms | 16.17 ms | 17.5 ms | 10 | 10 |
+| 100   | 439.5 ms | 445 ms   | 443.4 ms | 442.9 ms | 10 | 10 |
+| 500   | 2.091 s  | 2.169 s  | 2.147 s  | 2.134 s  | 10 | 10 |
+
+
+## Removed excess float multiplication / conversions
+**Timer precision:** 20 ns
+
+| Scene | Fastest | Slowest | Median | Mean | Samples | Iters |
+|-------|--------:|--------:|-------:|-----:|--------:|------:|
+| 0     | 15.6 ms  | 16.77 ms | 15.94 ms | 15.99 ms | 10 | 10 |
+| 100   | 361.7 ms | 372.3 ms | 367.5 ms | 367.6 ms | 10 | 10 |
+| 500   | 1.729 s  | 1.806 s  | 1.776 s  | 1.772 s  | 10 | 10 |
