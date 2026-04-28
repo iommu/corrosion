@@ -1,4 +1,4 @@
-use fltk::enums::Key;
+use macroquad::input::KeyCode;
 
 use crate::{matrix::Matrix4F, quaternion::Quaternion, transform::Transform, vector::Vector4F};
 
@@ -23,12 +23,10 @@ impl Camera {
         self.projection * (cam_rot * cam_trans)
     }
 
-    pub fn update(&mut self, key: Key, delta: f32) {
-        const KEY_W: Key = Key::from_char('w');
-        const KEY_A: Key = Key::from_char('a');
-        const KEY_S: Key = Key::from_char('s');
-        const KEY_D: Key = Key::from_char('d');
-
+    pub fn update<F>(&mut self, mut is_key_down: F, delta: f32)
+    where
+        F: FnMut(KeyCode) -> bool,
+    {
         let y_axis = Vector4F::new(0.0, 1.0, 0.0, 1.0);
 
         // Speed and rotation amounts are hardcoded here.
@@ -40,32 +38,31 @@ impl Camera {
 
         // Similarly, input keys are hardcoded here.
         // As before, in a more general system, you might want to have these as variables.
-        match key {
-            KEY_W => {
-                self.reposition(self.transform.rot().forward(), move_amount);
-            }
-            KEY_S => {
-                self.reposition(self.transform.rot().forward(), -move_amount);
-            }
-            KEY_A => {
-                self.reposition(self.transform.rot().left(), move_amount);
-            }
-            KEY_D => {
-                self.reposition(self.transform.rot().right(), move_amount);
-            }
-            Key::Right => {
-                self.rotate(y_axis, sens_x);
-            }
-            Key::Left => {
-                self.rotate(y_axis, -sens_x);
-            }
-            Key::Up => {
-                self.rotate(self.transform.rot().right(), -sens_y);
-            }
-            Key::Down => {
-                self.rotate(self.transform.rot().right(), sens_y);
-            }
-            _ => {}
+        let forward =
+            (is_key_down(KeyCode::W) as i8 - is_key_down(KeyCode::S) as i8) as f32 * move_amount;
+        let left = (is_key_down(KeyCode::A) as i8 - is_key_down(KeyCode::D) as i8) as f32 * move_amount;
+        let up = (is_key_down(KeyCode::Space) as i8 - is_key_down(KeyCode::LeftShift) as i8) as f32 * move_amount;
+        let tilt = (is_key_down(KeyCode::Down) as i8 - is_key_down(KeyCode::Up) as i8) as f32 * sens_y;
+        let azi = (is_key_down(KeyCode::Right) as i8 - is_key_down(KeyCode::Left) as i8) as f32 * sens_x;
+
+        if forward != 0.0 {
+            self.reposition(self.transform.rot().forward(), forward);
+        }
+
+        if left != 0.0 {
+            self.reposition(self.transform.rot().left(), left);
+        }
+
+        if up != 0.0 {
+            self.reposition(self.transform.rot().up(), up);
+        }
+
+        if tilt != 0.0 {
+            self.rotate(self.transform.rot().right(), tilt);
+        }
+
+        if azi != 0.0 {
+            self.rotate(y_axis, azi);
         }
     }
 

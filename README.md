@@ -24,3 +24,12 @@ scene            fastest       │ slowest       │ median        │ mean     
    ├─ 0          13.92 ms      │ 17.04 ms      │ 14.04 ms      │ 14.55 ms      │ 10      │ 10  
    ├─ 100        500.5 ms      │ 508.8 ms      │ 502.6 ms      │ 503.6 ms      │ 10      │ 10  
    ╰─ 500        2.451 s       │ 2.578 s       │ 2.478 s       │ 2.492 s       │ 10      │ 10  
+
+Moved from fltk to macroquad
+
+Timer precision: 20 ns
+scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters  
+╰─ render_scene                │               │               │               │         │  
+   ├─ 0          15.74 ms      │ 17.56 ms      │ 16.08 ms      │ 16.26 ms      │ 10      │ 10  
+   ├─ 100        431.6 ms      │ 449.3 ms      │ 438 ms        │ 438.6 ms      │ 10      │ 10  
+   ╰─ 500        2.101 s       │ 2.14 s        │ 2.104 s       │ 2.108 s       │ 10      │ 10  

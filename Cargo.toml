@@ -4,10 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+bytemuck = "1.25.0"
 derive-new = "0.7.0"
-fltk = "1.5.22"
 getset = "0.1.6"
 image = "0.25.10"
+macroquad = "0.4.14"
 rand = "0.10.1"
 
 [dev-dependencies]
@@ -16,3 +17,7 @@ divan = "0.1.21"
 [[bench]]
 name = "scene"
 harness = false
+required-features = ["bench"]
+
+[features]
+bench = []

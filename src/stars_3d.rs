@@ -1,4 +1,6 @@
-use crate::{bitmap::Bitmap, pixel::Pixel};
+use macroquad::color::{*};
+
+use crate::{bitmap::Bitmap};
 
 #[derive(Default, Clone)]
 pub struct Stars3D {
@@ -37,7 +39,7 @@ impl Stars3D {
     }
 
     pub fn update_and_render(&mut self, target: &mut Bitmap, delta: f32) {
-        target.fill_pixel(Pixel::BLACK);
+        target.fill_pixel(BLACK);
 
         let half_width = target.width() as f32 / 2.0;
         let half_height = target.height() as f32 / 2.0;
@@ -58,7 +60,7 @@ impl Stars3D {
             if (x < 0 || x >= target.width() as i64) || (y < 0 || y >= target.height() as i64) {
                 self.init_star(index);
             } else {
-                target.draw_pixel(x as usize, y as usize, Pixel::WHITE);
+                target.draw_pixel(x as usize, y as usize, WHITE);
             }
         }
     }

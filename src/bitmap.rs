@@ -1,21 +1,31 @@
 // Todo : use generics
 
-use std::path::Path;
+use std::path::{Component, Path};
 
 use image::{DynamicImage, GenericImageView, ImageError, ImageReader};
-
-use crate::pixel::Pixel;
+use macroquad::{color::Color, texture::Texture2D};
 
 pub struct Bitmap {
     size: [usize; 2],
     components: Vec<[u8; 4]>,
+    #[cfg(not(feature = "bench"))]
+    texture: Texture2D,
 }
 
 impl Bitmap {
     pub fn new(size: [usize; 2]) -> Self {
+        let components: Vec<[u8; 4]> = vec![[0, 0, 255, 255]; size[0] * size[1]];
+         #[cfg(not(feature = "bench"))]
+        let texture = Texture2D::from_rgba8(
+            size[0] as u16,
+            size[1] as u16,
+            bytemuck::cast_slice(&components),
+        );
         Self {
             size,
-            components: vec![[0, 0, 0, 255]; size[0] * size[1] * 4],
+            components,
+             #[cfg(not(feature = "bench"))]
+            texture,
         }
     }
 
@@ -26,14 +36,27 @@ impl Bitmap {
 
     pub fn new_from_img(img: DynamicImage) -> Self {
         let dims = img.dimensions();
-        let bytes = img.into_rgba8();
+        let size = [dims.0 as usize, dims.1 as usize];
+
+        let components: Vec<[u8; 4]> = img
+            .into_rgba8()
+            .into_raw()
+            .chunks_exact(4)
+            .map(|component| <[u8; 4]>::try_from(component).unwrap_or([0, 0, 0, 0]))
+            .collect();
+
+        #[cfg(not(feature = "bench"))]
+        let texture = Texture2D::from_rgba8(
+            size[0] as u16,
+            size[1] as u16,
+            bytemuck::cast_slice(&components),
+        );
+
         Self {
-            size: [dims.0 as usize, dims.1 as usize],
-            components: bytes
-                .into_raw()
-                .chunks_exact(4)
-                .map(|component| <[u8; 4]>::try_from(component).unwrap_or([0, 0, 0, 0]))
-                .collect(),
+            size,
+            components,
+            #[cfg(not(feature = "bench"))]
+            texture,
         }
     }
 
@@ -41,17 +64,17 @@ impl Bitmap {
         self.size
     }
 
-    pub fn fill_pixel(&mut self, pixel: Pixel) {
-        self.components.fill([pixel.r, pixel.g, pixel.b, pixel.a]);
+    pub fn fill_pixel(&mut self, fill_pixel: Color) {
+        self.components.fill([fill_pixel.r as u8, fill_pixel.g as u8, fill_pixel.b as u8, fill_pixel.a as u8]);
     }
 
     pub fn fill(&mut self, shade: u8) {
         self.components.fill([shade, shade, shade, shade]);
     }
 
-    pub fn draw_pixel(&mut self, x: usize, y: usize, pixel: Pixel) {
+    pub fn draw_pixel(&mut self, x: usize, y: usize, pixel: Color) {
         self.components[y * self.size[0] + x]
-            .copy_from_slice(&[pixel.r, pixel.g, pixel.b, pixel.a]);
+            .copy_from_slice(&[pixel.r as u8, pixel.g as u8, pixel.b as u8, pixel.a as u8]);
     }
 
     pub fn copy_pixel(
@@ -72,20 +95,30 @@ impl Bitmap {
         ];
     }
 
-    pub fn get_buffer(&mut self) -> &[u8] {
-        unsafe {
-            std::slice::from_raw_parts(
-                self.components.as_ptr() as *const u8,
-                self.components.len() * 4,
-            )
-        }
-    }
-
     pub fn width(&self) -> usize {
         self.size[0]
     }
 
     pub fn height(&self) -> usize {
         self.size[1]
+    }
+
+    #[cfg(not(feature = "bench"))]
+    pub fn update(&self) {
+        self.texture.update_from_bytes(
+            self.size[0] as u32,
+            self.size[1] as u32,
+            bytemuck::cast_slice(&self.components),
+        );
+    }
+}
+
+#[cfg(not(feature = "bench"))]
+impl std::ops::Deref for Bitmap {
+    type Target = Texture2D;
+
+    fn deref(&self) -> &Self::Target {
+        self.update();
+        &self.texture
     }
 }
