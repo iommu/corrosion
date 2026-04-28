@@ -42,3 +42,12 @@ scene            fastest       │ slowest       │ median        │ mean     
    ├─ 0          16 ms         │ 29.62 ms      │ 16.17 ms      │ 17.5 ms       │ 10      │ 10  
    ├─ 100        439.5 ms      │ 445 ms        │ 443.4 ms      │ 442.9 ms      │ 10      │ 10  
    ╰─ 500        2.091 s       │ 2.169 s       │ 2.147 s       │ 2.134 s       │ 10      │ 10  
+
+Removed excess float multiplication / conversions
+
+Timer precision: 20 ns  
+scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters  
+╰─ render_scene                │               │               │               │         │  
+   ├─ 0          15.6 ms       │ 16.77 ms      │ 15.94 ms      │ 15.99 ms      │ 10      │ 10  
+   ├─ 100        361.7 ms      │ 372.3 ms      │ 367.5 ms      │ 367.6 ms      │ 10      │ 10  
+   ╰─ 500        1.729 s       │ 1.806 s       │ 1.776 s       │ 1.772 s       │ 10      │ 10  
