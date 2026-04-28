@@ -46,11 +46,11 @@ impl Bitmap {
         let x_max = right.x().ceil() as i32;
         let x_pre = x_min as f32 - left.x();
 
-        let tex_coord_xx_step = gradients.tex_coord_xx_step;
-        let tex_coord_yx_step = gradients.tex_coord_yx_step;
-        let zx_step_inv = gradients.zx_step_inv;
-        let depth_x_step = gradients.depth_x_step;
-        let light_amount_step = gradients.light_amount_x_step * x_pre;
+        let tex_coord_xx_step = gradients.tex_coord_x().x_step();
+        let tex_coord_yx_step = gradients.tex_coord_y().x_step();
+        let zx_step_inv = gradients.z_inv().x_step();
+        let depth_x_step = gradients.depth().x_step();
+        let light_amount_step = gradients.light_amount().x_step();
 
         let mut tex_coord_x = left.tex_coord_x() + tex_coord_xx_step * x_pre;
         let mut tex_coord_y = left.tex_coord_y() + tex_coord_yx_step * x_pre;
@@ -86,8 +86,8 @@ impl Bitmap {
         texture: &Bitmap,
         z_buffer: &mut Vec<f32>,
     ) {
-        let y_start = b.y_start();
-        let y_end = b.y_end();
+        let y_start = *b.y_start();
+        let y_end = *b.y_end();
 
         let [left, right] = match handedness {
             true => [b, a],

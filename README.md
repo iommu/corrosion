@@ -33,3 +33,12 @@ scene            fastest       │ slowest       │ median        │ mean     
    ├─ 0          15.74 ms      │ 17.56 ms      │ 16.08 ms      │ 16.26 ms      │ 10      │ 10  
    ├─ 100        431.6 ms      │ 449.3 ms      │ 438 ms        │ 438.6 ms      │ 10      │ 10  
    ╰─ 500        2.101 s       │ 2.14 s        │ 2.104 s       │ 2.108 s       │ 10      │ 10  
+
+Cleaner to read Gradient struct
+
+Timer precision: 40 ns  
+scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters  
+╰─ render_scene                │               │               │               │         │  
+   ├─ 0          16 ms         │ 29.62 ms      │ 16.17 ms      │ 17.5 ms       │ 10      │ 10  
+   ├─ 100        439.5 ms      │ 445 ms        │ 443.4 ms      │ 442.9 ms      │ 10      │ 10  
+   ╰─ 500        2.091 s       │ 2.169 s       │ 2.147 s       │ 2.134 s       │ 10      │ 10  

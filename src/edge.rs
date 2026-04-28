@@ -1,19 +1,42 @@
-use crate::{gradients::Gradients, vertex::Vertex};
+use crate::{
+    gradients::{Gradient, Gradients},
+    vertex::Vertex,
+};
 
-#[derive(Clone, Copy)]
+use getset::Getters;
+
+impl Gradient {
+    pub fn initial(&self, min_y_vert_idx: usize, x_pre: f32, y_pre: f32) -> f32 {
+        self.values()[min_y_vert_idx] + self.x_step() * x_pre + self.y_step() * y_pre
+    }
+
+    pub fn step(&self, x_step: f32) -> f32 {
+        self.y_step() + self.x_step() * x_step
+    }
+}
+
+#[derive(Clone, Copy, Getters)]
 pub struct Edge {
+    #[getset(get = "pub")]
     x: f32,
     x_step: f32,
+    #[getset(get = "pub")]
     y_start: i32,
+    #[getset(get = "pub")]
     y_end: i32,
+    #[getset(get = "pub")]
     tex_coord_x: f32,
     tex_coord_x_step: f32,
+    #[getset(get = "pub")]
     tex_coord_y: f32,
     tex_coord_y_step: f32,
+    #[getset(get = "pub")]
     z_inv: f32,
-    z_step_inv: f32,
+    z_inv_step: f32,
+    #[getset(get = "pub")]
     depth: f32,
     depth_step: f32,
+    #[getset(get = "pub")]
     light_amount: f32,
     light_amount_step: f32,
 }
@@ -37,31 +60,28 @@ impl Edge {
         let x = min_y_vert.x() + y_pre * x_step;
         let x_pre = x - min_y_vert.x();
 
-        let tex_coord_x = gradients.tex_coords_x[min_y_vert_idx]
-            + gradients.tex_coord_xx_step * x_pre
-            + gradients.tex_coord_xy_step * y_pre;
-        let tex_coord_y = gradients.tex_coords_y[min_y_vert_idx]
-            + gradients.tex_coord_yx_step * x_pre
-            + gradients.tex_coord_yy_step * y_pre;
+        let tex_coord_x = gradients
+            .tex_coord_x()
+            .initial(min_y_vert_idx, x_pre, y_pre);
+        let tex_coord_y = gradients
+            .tex_coord_y()
+            .initial(min_y_vert_idx, x_pre, y_pre);
 
-        let tex_coord_x_step = gradients.tex_coord_xy_step + gradients.tex_coord_xx_step * x_step;
-        let tex_coord_y_step = gradients.tex_coord_yy_step + gradients.tex_coord_yx_step * x_step;
+        let tex_coord_x_step =
+            gradients.tex_coord_x().y_step() + gradients.tex_coord_x().x_step() * x_step;
+        let tex_coord_y_step =
+            gradients.tex_coord_y().y_step() + gradients.tex_coord_y().x_step() * x_step;
 
-        let z_inv = gradients.z_inv[min_y_vert_idx]
-            + gradients.zx_step_inv * x_pre
-            + gradients.zy_step_inv * y_pre;
-        let z_step_inv = gradients.zy_step_inv + gradients.zx_step_inv * x_step;
+        let z_inv = gradients.z_inv().initial(min_y_vert_idx, x_pre, y_pre);
+        let z_inv_step = gradients.z_inv().step(x_step);
 
-        let depth = gradients.depth[min_y_vert_idx]
-            + gradients.depth_x_step * x_pre
-            + gradients.depth_y_step * y_pre;
-        let depth_step = gradients.depth_y_step + gradients.depth_x_step * x_step;
+        let depth = gradients.depth().initial(min_y_vert_idx, x_pre, y_pre);
+        let depth_step = gradients.depth().step(x_step);
 
-        let light_amount = gradients.light_amount[min_y_vert_idx]
-            + gradients.light_amount_x_step * x_pre
-            + gradients.light_amount_y_step * y_pre;
-        let light_amount_step =
-            gradients.light_amount_y_step + gradients.light_amount_x_step * x_step;
+        let light_amount = gradients
+            .light_amount()
+            .initial(min_y_vert_idx, x_pre, y_pre);
+        let light_amount_step = gradients.light_amount().step(x_step);
 
         Self {
             x,
@@ -73,7 +93,7 @@ impl Edge {
             tex_coord_y,
             tex_coord_y_step,
             z_inv,
-            z_step_inv,
+            z_inv_step,
             depth,
             depth_step,
             light_amount,
@@ -81,43 +101,14 @@ impl Edge {
         }
     }
 
-    pub fn x(&self) -> f32 {
-        self.x
-    }
 
-    pub fn y_start(&self) -> i32 {
-        self.y_start
-    }
 
-    pub fn y_end(&self) -> i32 {
-        self.y_end
-    }
-
-    pub fn tex_coord_x(&self) -> f32 {
-        self.tex_coord_x
-    }
-
-    pub fn tex_coord_y(&self) -> f32 {
-        self.tex_coord_y
-    }
-
-    pub fn z_inv(&self) -> f32 {
-        self.z_inv
-    }
-
-    pub fn depth(&self) -> f32 {
-        self.depth
-    }
-
-    pub fn light_amount(&self) -> f32 {
-        self.light_amount
-    }
 
     pub fn step(&mut self) {
         self.x += self.x_step;
         self.tex_coord_x += self.tex_coord_x_step;
         self.tex_coord_y += self.tex_coord_y_step;
-        self.z_inv += self.z_step_inv;
+        self.z_inv += self.z_inv_step;
         self.depth += self.depth_step;
         self.light_amount += self.light_amount_step;
     }

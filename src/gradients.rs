@@ -1,26 +1,87 @@
+use std::ops::Index;
+
 use crate::{vector::Vector4F, vertex::Vertex};
+
+use getset::Getters;
 
 fn saturate(val: f32) -> f32 {
     val.max(0.0).min(1.0)
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Getters)]
+pub struct Gradient {
+    #[getset(get = "pub")]
+    values: [f32; 3],
+    #[getset(get = "pub")]
+    x_step: f32,
+    #[getset(get = "pub")]
+    y_step: f32,
+}
+
+impl Gradient {
+    pub fn new(
+        values: [f32; 3],
+        min_y_vert: &Vertex,
+        mid_y_vert: &Vertex,
+        max_y_vert: &Vertex,
+        dx_inv: f32,
+        dy_inv: f32,
+    ) -> Self {
+        let x_step = Self::calc_x_step(&values, min_y_vert, mid_y_vert, max_y_vert, dx_inv);
+        let y_step = Self::calc_y_step(&values, min_y_vert, mid_y_vert, max_y_vert, dy_inv);
+        Self {
+            values,
+            x_step,
+            y_step,
+        }
+    }
+
+    fn calc_x_step(
+        values: &[f32; 3],
+        min_y_vert: &Vertex,
+        mid_y_vert: &Vertex,
+        max_y_vert: &Vertex,
+        dx_inv: f32,
+    ) -> f32 {
+        (((values[1] - values[2]) * (min_y_vert.y() - max_y_vert.y()))
+            - ((values[0] - values[2]) * (mid_y_vert.y() - max_y_vert.y())))
+            * dx_inv
+    }
+
+    fn calc_y_step(
+        values: &[f32; 3],
+        min_y_vert: &Vertex,
+        mid_y_vert: &Vertex,
+        max_y_vert: &Vertex,
+        dy_inv: f32,
+    ) -> f32 {
+        (((values[1] - values[2]) * (min_y_vert.x() - max_y_vert.x()))
+            - ((values[0] - values[2]) * (mid_y_vert.x() - max_y_vert.x())))
+            * dy_inv
+    }
+}
+
+// Indexing
+
+impl Index<usize> for Gradient {
+    type Output = f32;
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.values[index]
+    }
+}
+
+#[derive(Clone, Copy, Getters)]
 pub struct Gradients {
-    pub tex_coords_x: [f32; 3],
-    pub tex_coords_y: [f32; 3],
-    pub z_inv: [f32; 3],
-    pub depth: [f32; 3],
-    pub light_amount: [f32; 3],
-    pub tex_coord_xx_step: f32,
-    pub tex_coord_xy_step: f32,
-    pub tex_coord_yx_step: f32,
-    pub tex_coord_yy_step: f32,
-    pub zx_step_inv: f32,
-    pub zy_step_inv: f32,
-    pub depth_x_step: f32,
-    pub depth_y_step: f32,
-    pub light_amount_x_step: f32,
-    pub light_amount_y_step: f32,
+    #[getset(get = "pub")]
+    tex_coord_x: Gradient,
+    #[getset(get = "pub")]
+    tex_coord_y: Gradient,
+    #[getset(get = "pub")]
+    z_inv: Gradient,
+    #[getset(get = "pub")]
+    depth: Gradient,
+    #[getset(get = "pub")]
+    light_amount: Gradient,
 }
 
 impl Gradients {
@@ -36,67 +97,69 @@ impl Gradients {
             1.0 / mid_y_vert.pos().w(),
             1.0 / max_y_vert.pos().w(),
         ];
-        let tex_coords_x = [
-            min_y_vert.tex_coords().x() * z_inv[0],
-            mid_y_vert.tex_coords().x() * z_inv[1],
-            max_y_vert.tex_coords().x() * z_inv[2],
-        ];
-        let tex_coords_y = [
-            min_y_vert.tex_coords().y() * z_inv[0],
-            mid_y_vert.tex_coords().y() * z_inv[1],
-            max_y_vert.tex_coords().y() * z_inv[2],
-        ];
+
+        let tex_coord_x = Gradient::new(
+            [
+                min_y_vert.tex_coords().x() * z_inv[0],
+                mid_y_vert.tex_coords().x() * z_inv[1],
+                max_y_vert.tex_coords().x() * z_inv[2],
+            ],
+            &min_y_vert,
+            &mid_y_vert,
+            &max_y_vert,
+            dx_inv,
+            dy_inv,
+        );
+
+        let tex_coord_y = Gradient::new(
+            [
+                min_y_vert.tex_coords().y() * z_inv[0],
+                mid_y_vert.tex_coords().y() * z_inv[1],
+                max_y_vert.tex_coords().y() * z_inv[2],
+            ],
+            &min_y_vert,
+            &mid_y_vert,
+            &max_y_vert,
+            dx_inv,
+            dy_inv,
+        );
+
+        let z_inv = Gradient::new(z_inv, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv, dy_inv);
+
+        let depth = Gradient::new(
+            [
+                min_y_vert.pos().z(),
+                mid_y_vert.pos().z(),
+                max_y_vert.pos().z(),
+            ],
+            &min_y_vert,
+            &mid_y_vert,
+            &max_y_vert,
+            dx_inv,
+            dy_inv,
+        );
 
         let light_dir = Vector4F::new(0.0, 0.0, 1.0, 1.0);
-        let light_amount = [
-            saturate(min_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
-            saturate(mid_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
-            saturate(max_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
-        ];
 
-        let depth = [
-            min_y_vert.pos().z(),
-            mid_y_vert.pos().z(),
-            max_y_vert.pos().z(),
-        ];
-
-        let tex_coord_xx_step =
-            Self::calc_x_step(&tex_coords_x, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
-        let tex_coord_xy_step =
-            Self::calc_y_step(&tex_coords_x, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
-
-        let tex_coord_yx_step =
-            Self::calc_x_step(&tex_coords_y, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
-        let tex_coord_yy_step =
-            Self::calc_y_step(&tex_coords_y, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
-
-        let zx_step_inv = Self::calc_x_step(&z_inv, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
-        let zy_step_inv = Self::calc_y_step(&z_inv, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
-
-        let depth_x_step = Self::calc_x_step(&depth, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
-        let depth_y_step = Self::calc_y_step(&depth, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
-
-        let light_amount_x_step =
-            Self::calc_x_step(&light_amount, &min_y_vert, &mid_y_vert, &max_y_vert, dx_inv);
-        let light_amount_y_step =
-            Self::calc_y_step(&light_amount, &min_y_vert, &mid_y_vert, &max_y_vert, dy_inv);
+        let light_amount = Gradient::new(
+            [
+                saturate(min_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
+                saturate(mid_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
+                saturate(max_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
+            ],
+            &min_y_vert,
+            &mid_y_vert,
+            &max_y_vert,
+            dx_inv,
+            dy_inv,
+        );
 
         Self {
-            tex_coords_x,
-            tex_coords_y,
+            tex_coord_x,
+            tex_coord_y,
             z_inv,
-            tex_coord_xx_step,
-            tex_coord_xy_step,
-            tex_coord_yx_step,
-            tex_coord_yy_step,
-            zx_step_inv,
-            zy_step_inv,
             depth,
-            depth_x_step,
-            depth_y_step,
             light_amount,
-            light_amount_x_step,
-            light_amount_y_step,
         }
     }
 
