@@ -9,7 +9,11 @@ use corrosion::{
     vector::Vector4F,
 };
 use macroquad::{
-    color::{BLACK, WHITE}, input::is_key_down, texture::draw_texture, time::get_frame_time, window::next_frame
+    color::{BLACK, WHITE},
+    input::is_key_down,
+    texture::draw_texture,
+    time::get_frame_time,
+    window::next_frame,
 };
 
 #[cfg(feature = "bench")]
@@ -35,7 +39,7 @@ async fn main() {
 
     let monkey_trans = Transform::from_pos(Vector4F::new(0.0, 0.0, 3.0, 1.0));
     let terrain_trans = Transform::from_pos(Vector4F::new(0.0, -1.0, 0.0, 1.0));
-    
+
     loop {
         camera.update(is_key_down, get_frame_time());
 

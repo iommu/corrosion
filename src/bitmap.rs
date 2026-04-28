@@ -1,6 +1,6 @@
 // Todo : use generics
 
-use std::path::{Component, Path};
+use std::path::Path;
 
 use image::{DynamicImage, GenericImageView, ImageError, ImageReader};
 use macroquad::{color::Color, texture::Texture2D};

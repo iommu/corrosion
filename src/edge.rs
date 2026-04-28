@@ -101,9 +101,6 @@ impl Edge {
         }
     }
 
-
-
-
     pub fn step(&mut self) {
         self.x += self.x_step;
         self.tex_coord_x += self.tex_coord_x_step;

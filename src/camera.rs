@@ -40,10 +40,14 @@ impl Camera {
         // As before, in a more general system, you might want to have these as variables.
         let forward =
             (is_key_down(KeyCode::W) as i8 - is_key_down(KeyCode::S) as i8) as f32 * move_amount;
-        let left = (is_key_down(KeyCode::A) as i8 - is_key_down(KeyCode::D) as i8) as f32 * move_amount;
-        let up = (is_key_down(KeyCode::Space) as i8 - is_key_down(KeyCode::LeftShift) as i8) as f32 * move_amount;
-        let tilt = (is_key_down(KeyCode::Down) as i8 - is_key_down(KeyCode::Up) as i8) as f32 * sens_y;
-        let azi = (is_key_down(KeyCode::Right) as i8 - is_key_down(KeyCode::Left) as i8) as f32 * sens_x;
+        let left =
+            (is_key_down(KeyCode::A) as i8 - is_key_down(KeyCode::D) as i8) as f32 * move_amount;
+        let up = (is_key_down(KeyCode::Space) as i8 - is_key_down(KeyCode::LeftShift) as i8) as f32
+            * move_amount;
+        let tilt =
+            (is_key_down(KeyCode::Down) as i8 - is_key_down(KeyCode::Up) as i8) as f32 * sens_y;
+        let azi =
+            (is_key_down(KeyCode::Right) as i8 - is_key_down(KeyCode::Left) as i8) as f32 * sens_x;
 
         if forward != 0.0 {
             self.reposition(self.transform.rot().forward(), forward);

@@ -1,4 +1,3 @@
-use getset::{Getters, MutGetters};
 use std::ops::{Add, Div, Mul, Sub};
 
 use crate::{matrix::Matrix4F, vector::Vector4F};

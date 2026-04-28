@@ -162,28 +162,4 @@ impl Gradients {
             light_amount,
         }
     }
-
-    fn calc_x_step(
-        values: &[f32; 3],
-        min_y_vert: &Vertex,
-        mid_y_vert: &Vertex,
-        max_y_vert: &Vertex,
-        dx_inv: f32,
-    ) -> f32 {
-        (((values[1] - values[2]) * (min_y_vert.y() - max_y_vert.y()))
-            - ((values[0] - values[2]) * (mid_y_vert.y() - max_y_vert.y())))
-            * dx_inv
-    }
-
-    fn calc_y_step(
-        values: &[f32; 3],
-        min_y_vert: &Vertex,
-        mid_y_vert: &Vertex,
-        max_y_vert: &Vertex,
-        dy_inv: f32,
-    ) -> f32 {
-        (((values[1] - values[2]) * (min_y_vert.x() - max_y_vert.x()))
-            - ((values[0] - values[2]) * (mid_y_vert.x() - max_y_vert.x())))
-            * dy_inv
-    }
 }

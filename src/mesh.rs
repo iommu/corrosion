@@ -1,7 +1,7 @@
-use std::{io, path::Path};
 use getset::{Getters, MutGetters};
+use std::{io, path::Path};
 
-use crate::{bitmap::Bitmap, obj_loader::OBJModel, vertex::Vertex};
+use crate::{obj_loader::OBJModel, vertex::Vertex};
 
 #[derive(Clone, Getters, MutGetters)]
 pub struct Mesh {

@@ -51,7 +51,7 @@ impl IndexedModel {
             let delta_u_2 = self.tex_coords[i_2].x() - self.tex_coords[i_0].x();
             let delta_v_2 = self.tex_coords[i_2].y() - self.tex_coords[i_0].y();
 
-            let dividend = (delta_u_1 * delta_v_2 - delta_u_2 * delta_v_1);
+            let dividend = delta_u_1 * delta_v_2 - delta_u_2 * delta_v_1;
             let f = if dividend == 0.0 { 0.0 } else { 1.0 / dividend };
 
             let tangent = Vector4F::new(

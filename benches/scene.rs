@@ -19,7 +19,7 @@ fn main() {
 }
 
 #[divan::bench(sample_count = 10, args = [0, 100, 500])]
-fn render_scene(iterations : usize) {
+fn render_scene(iterations: usize) {
     let mut bitmap = Bitmap::new([800, 600]);
     let mut z_buffer = gen_buffer(&bitmap);
     let mut camera = Camera::new(Matrix4F::new_perspective(
@@ -58,5 +58,4 @@ fn render_scene(iterations : usize) {
             &mut z_buffer,
         );
     }
-
 }
