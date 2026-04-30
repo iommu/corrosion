@@ -23,7 +23,7 @@ impl Camera {
         self.projection * (cam_rot * cam_trans)
     }
 
-    pub fn update<F>(&mut self, mut is_key_down: F, delta: f32)
+    pub fn update<F>(&mut self, mut is_key_down: F, delta: f32, scroll: f32)
     where
         F: FnMut(KeyCode) -> bool,
     {
@@ -38,8 +38,9 @@ impl Camera {
 
         // Similarly, input keys are hardcoded here.
         // As before, in a more general system, you might want to have these as variables.
-        let forward =
-            (is_key_down(KeyCode::W) as i8 - is_key_down(KeyCode::S) as i8) as f32 * move_amount;
+        let forward = ((is_key_down(KeyCode::W) as i8 - is_key_down(KeyCode::S) as i8) as f32
+            * move_amount)
+            + (scroll * move_amount * 5.0);
         let left =
             (is_key_down(KeyCode::A) as i8 - is_key_down(KeyCode::D) as i8) as f32 * move_amount;
         let up = (is_key_down(KeyCode::Space) as i8 - is_key_down(KeyCode::LeftShift) as i8) as f32

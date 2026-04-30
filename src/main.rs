@@ -11,7 +11,7 @@ use corrosion::{camera::Camera, gui::DisplayTransform, stars_3d::Stars3D};
 
 use macroquad::{
     color::{BLACK, WHITE},
-    input::is_key_down,
+    input::{is_key_down, mouse_wheel},
     texture::draw_texture,
     time::draw_fps,
     time::get_frame_time,
@@ -48,7 +48,7 @@ async fn main() {
     let mut show_fps = false;
 
     loop {
-        camera.update(is_key_down, get_frame_time());
+        camera.update(is_key_down, get_frame_time(), mouse_wheel().1);
 
         let vp = camera.get_view_projection();
 
@@ -73,7 +73,7 @@ async fn main() {
         draw_texture(&bitmap, 0.0, 0.0, WHITE);
 
         egui_macroquad::ui(|egui_ctx| {
-            egui::Window::new("egui ❤ macroquad").show(egui_ctx, |ui| {
+            egui::Window::new("Settings").show(egui_ctx, |ui| {
                 ui.label("Test");
                 monkey_trans.ui(ui, "Monkey");
                 ui.checkbox(&mut show_fps, "Show FPS");
