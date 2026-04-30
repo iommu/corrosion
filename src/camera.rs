@@ -1,6 +1,6 @@
 use macroquad::input::KeyCode;
 
-use crate::{matrix::Matrix4F, quaternion::Quaternion, transform::Transform, vector::Vector4F};
+use libcorr::{matrix::Matrix4F, quaternion::Quaternion, transform::Transform, vector::Vector4F};
 
 pub struct Camera {
     transform: Transform,

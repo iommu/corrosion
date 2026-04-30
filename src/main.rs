@@ -1,20 +1,24 @@
-use corrosion::{
+use libcorr::{
     bitmap::Bitmap,
-    camera::Camera,
     matrix::Matrix4F,
     mesh::Mesh,
     render_ctx::{clear_buffer, gen_buffer},
-    stars_3d::Stars3D,
     transform::Transform,
     vector::Vector4F,
 };
+
+use corrosion::{camera::Camera, gui::DisplayTransform, stars_3d::Stars3D};
+
 use macroquad::{
     color::{BLACK, WHITE},
     input::is_key_down,
     texture::draw_texture,
+    time::draw_fps,
     time::get_frame_time,
     window::next_frame,
 };
+
+use egui_macroquad::egui;
 
 #[cfg(feature = "bench")]
 fn main() {}
@@ -37,8 +41,11 @@ async fn main() {
     let monkey_mesh = Mesh::new_from_obj_file("res/smoothMonkey0.obj").unwrap();
     let terrain_mesh = Mesh::new_from_obj_file("res/terrain2.obj").unwrap();
 
-    let monkey_trans = Transform::from_pos(Vector4F::new(0.0, 0.0, 3.0, 1.0));
+    let mut monkey_trans = DisplayTransform::from_pos(Vector4F::new(0.0, 0.0, 3.0, 1.0));
     let terrain_trans = Transform::from_pos(Vector4F::new(0.0, -1.0, 0.0, 1.0));
+
+    // GUI
+    let mut show_fps = false;
 
     loop {
         camera.update(is_key_down, get_frame_time());
@@ -64,6 +71,21 @@ async fn main() {
         );
 
         draw_texture(&bitmap, 0.0, 0.0, WHITE);
+
+        egui_macroquad::ui(|egui_ctx| {
+            egui::Window::new("egui ❤ macroquad").show(egui_ctx, |ui| {
+                ui.label("Test");
+                monkey_trans.ui(ui, "Monkey");
+                ui.checkbox(&mut show_fps, "Show FPS");
+            });
+        });
+
+        egui_macroquad::draw();
+
+        if show_fps {
+            draw_fps();
+        }
+
         next_frame().await
     }
 }

@@ -191,6 +191,36 @@ impl Quaternion {
     pub fn w_mut(&mut self) -> &mut f32 {
         self.0.w_mut()
     }
+
+    // Note XYZ order transform
+    // https://marc-b-reynolds.github.io/math/2017/04/18/TaitEuler.html
+    pub fn to_euler(&self) -> Vector4F {
+        let x = self.x();
+        let y = self.y();
+        let z = self.z();
+        let w = self.w();
+
+        let t_0 = x * x - z * z;
+        let t_1 = w * w - y * y;
+        let x_x = 0.5 * (t_0 + t_1);
+        let x_y = x * y + w * z;
+        let x_z = w * y - x * z;
+        let y_z = 2.0 * (y * z + w * x);
+        let t = x_x * x_x + x_y * x_y;
+
+        let z = f32::atan2(x_y, x_x);
+        let y = x_z / t.sqrt();
+        let x = if t != 0.0 {
+            f32::atan2(y_z, t_1 - t_0)
+        } else {
+            2.0 * f32::atan2(x, w) - x_z.signum() * z
+        };
+        Vector4F::new(x, y, z, 1.0)
+    }
+
+    pub fn from_euler(&mut self, rhs: Vector4F) {
+        *self = Quaternion::from_rot(&Matrix4F::new_rotation(rhs.x(), rhs.y(), rhs.z()))
+    }
 }
 
 // Addition

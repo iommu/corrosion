@@ -1,6 +1,6 @@
 use macroquad::color::*;
 
-use crate::bitmap::Bitmap;
+use libcorr::bitmap::Bitmap;
 
 #[derive(Default, Clone)]
 pub struct Stars3D {
