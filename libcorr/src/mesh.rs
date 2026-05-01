@@ -12,8 +12,8 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn new_from_obj_file<P: AsRef<Path>>(path: P) -> io::Result<Self> {
-        let model = OBJModel::new_from_file(path)?.to_indexedmodel();
+    pub fn new_from_obj_bytes(bytes: &[u8]) -> io::Result<Self> {
+        let model = OBJModel::new_from_bytes(bytes)?.to_indexedmodel();
         let mut vertices: Vec<Vertex> = vec![];
 
         for idx in 0..model.positions().len() {

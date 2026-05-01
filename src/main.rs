@@ -11,11 +11,11 @@ use corrosion::{camera::Camera, gui::DisplayTransform, stars_3d::Stars3D};
 
 use macroquad::{
     color::{BLACK, WHITE},
-    file::set_pc_assets_folder,
     input::{is_key_down, mouse_wheel},
     texture::draw_texture,
     time::{draw_fps, get_frame_time},
     window::next_frame,
+    window::{screen_height, screen_width},
 };
 
 use egui_macroquad::egui;
@@ -26,12 +26,11 @@ fn main() {}
 #[cfg(not(feature = "bench"))]
 #[macroquad::main("Corrosion")]
 async fn main() {
-    set_pc_assets_folder("res");
-    let mut bitmap = Bitmap::new([800, 600]);
+    let mut bitmap = Bitmap::new([screen_width() as usize, screen_height() as usize]);
     let mut z_buffer = gen_buffer(&bitmap);
     let mut camera = Camera::new(Matrix4F::new_perspective(
         (70.0_f32).to_radians(),
-        800.0 / 600.0,
+        bitmap.width() as f32 / bitmap.height() as f32,
         0.1,
         1000.0,
     ));
@@ -39,8 +38,8 @@ async fn main() {
     let texture_1 = Bitmap::new_from_bytes(include_bytes!("../res/bricks2.png"), None).unwrap();
     let texture_2 = Bitmap::new_from_bytes(include_bytes!("../res/bricks.png"), None).unwrap();
 
-    let monkey_mesh = Mesh::new_from_obj_file("../res/smoothMonkey0.obj").unwrap();
-    let terrain_mesh = Mesh::new_from_obj_file("../res/terrain2.obj").unwrap();
+    let monkey_mesh = Mesh::new_from_obj_bytes(include_bytes!("../res/smoothMonkey0.obj")).unwrap();
+    let terrain_mesh = Mesh::new_from_obj_bytes(include_bytes!("../res/terrain2.obj")).unwrap();
 
     let mut monkey_trans = DisplayTransform::from_pos(Vector4F::new(0.0, 0.0, 3.0, 1.0));
     let terrain_trans = Transform::from_pos(Vector4F::new(0.0, -1.0, 0.0, 1.0));

@@ -64,7 +64,7 @@ impl OBJModel {
         Ok(idx)
     }
 
-    pub fn new_from_file<P: AsRef<Path>>(path: P) -> io::Result<Self> {
+    pub fn new_from_bytes(bytes: &[u8]) -> io::Result<Self> {
         let mut mdl = Self {
             positions: vec![],
             tex_coords: vec![],
@@ -74,8 +74,7 @@ impl OBJModel {
             has_normals: false,
         };
 
-        let file = File::open(path)?;
-        let reader = BufReader::new(file).lines();
+        let reader = BufReader::new(bytes).lines();
         for line in reader.map_while(Result::ok) {
             let mut tokens: Vec<&str> = line.split(" ").collect();
             Self::strings_rm_empty(&mut tokens);

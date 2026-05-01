@@ -14,6 +14,15 @@ Built for debugging with LLDB with vscodium (vadimcn.vscode-lldb)
 cargo run
 ```
 
+## Web
+
+```bash
+cargo build --release --target wasm32-unknown-unknown
+python -m http.server 8080
+# Viewable on http://localhost:8080
+```
+
+
 # Benchmark
 
 Ran with
