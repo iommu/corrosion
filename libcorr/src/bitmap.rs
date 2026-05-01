@@ -2,79 +2,61 @@
 
 use std::path::Path;
 
-use image::{DynamicImage, GenericImageView, ImageError, ImageReader};
-use macroquad::{color::Color, texture::Texture2D};
+use macroquad::{
+    Error,
+    color::Color,
+    prelude::ImageFormat,
+    texture::{Image, Texture2D},
+};
 
-pub struct Bitmap {
-    size: [usize; 2],
-    components: Vec<[u8; 4]>,
-    #[cfg(not(feature = "bench"))]
-    texture: Texture2D,
-}
+pub struct Bitmap(Image);
 
 impl Bitmap {
     pub fn new(size: [usize; 2]) -> Self {
-        let components: Vec<[u8; 4]> = vec![[0, 0, 255, 255]; size[0] * size[1]];
-        #[cfg(not(feature = "bench"))]
-        let texture = Texture2D::from_rgba8(
-            size[0] as u16,
-            size[1] as u16,
-            bytemuck::cast_slice(&components),
-        );
-        Self {
-            size,
-            components,
-            #[cfg(not(feature = "bench"))]
-            texture,
-        }
+        Self(Image {
+            bytes: vec![0u8; size[0] * size[1] * 4],
+            width: size[0] as u16,
+            height: size[1] as u16,
+        })
     }
 
-    pub fn new_from_file<P: AsRef<Path>>(path: P) -> Result<Self, ImageError> {
-        let img = ImageReader::open(path)?.decode()?;
+    pub fn new_from_bytes(bytes: &[u8], format: Option<ImageFormat>) -> Result<Self, Error> {
+        let img = Image::from_file_with_format(bytes, format)?;
         Ok(Self::new_from_img(img))
     }
 
-    pub fn new_from_img(img: DynamicImage) -> Self {
-        let dims = img.dimensions();
-        let size = [dims.0 as usize, dims.1 as usize];
+    #[inline]
+    fn slice_mut(bytes: &mut Vec<u8>) -> &mut [[u8; 4]] {
+        unsafe { std::slice::from_raw_parts_mut(bytes.as_mut_ptr() as *mut [u8; 4], bytes.len()) }
+    }
 
-        let components: Vec<[u8; 4]> = img
-            .into_rgba8()
-            .into_raw()
-            .chunks_exact(4)
-            .map(|component| <[u8; 4]>::try_from(component).unwrap_or([0, 0, 0, 0]))
-            .collect();
+    #[inline]
+    fn slice(bytes: &Vec<u8>) -> &[[u8; 4]] {
+        unsafe { std::slice::from_raw_parts(bytes.as_ptr() as *mut [u8; 4], bytes.len()) }
+    }
 
-        #[cfg(not(feature = "bench"))]
-        let texture = Texture2D::from_rgba8(
-            size[0] as u16,
-            size[1] as u16,
-            bytemuck::cast_slice(&components),
-        );
-
-        Self {
-            size,
-            components,
-            #[cfg(not(feature = "bench"))]
-            texture,
-        }
+    pub fn new_from_img(img: Image) -> Self {
+        Self(img)
     }
 
     pub fn size(&self) -> [usize; 2] {
-        self.size
+        [self.0.width as usize, self.0.height as usize]
     }
 
     pub fn fill_pixel(&mut self, pixel: Color) {
-        self.components
-            .fill([pixel.r as u8, pixel.g as u8, pixel.b as u8, pixel.a as u8]);
+        for buff in unsafe { self.0.bytes.as_chunks_unchecked_mut() } {
+            *buff = [pixel.r as u8, pixel.g as u8, pixel.b as u8, pixel.a as u8];
+        }
     }
 
     pub fn fill(&mut self, shade: u8) {
-        self.components.fill([shade, shade, shade, shade]);
+        for buff in unsafe { self.0.bytes.as_chunks_unchecked_mut() } {
+            *buff = [shade, shade, shade, 255];
+        }
     }
 
     pub fn draw_pixel(&mut self, x: usize, y: usize, pixel: Color) {
-        self.components[y * self.size[0] + x] =
+        Self::slice_mut(&mut self.0.bytes)[y * self.0.width as usize + x] =
             [pixel.r as u8, pixel.g as u8, pixel.b as u8, pixel.a as u8];
     }
 
@@ -88,14 +70,14 @@ impl Bitmap {
         bitmap: &Bitmap,
         light_amount: f32,
     ) {
-        let src_idx = y_src * bitmap.size[0] + x_src;
-        let dst_idx = y_dest * self.size[0] + x_dest;
-        let [r, g, b, a] = bitmap.components[src_idx];
+        let src_idx = y_src * bitmap.0.width as usize + x_src;
+        let dst_idx = y_dest * self.0.width as usize + x_dest;
+        let [r, g, b, a] = Self::slice(&bitmap.0.bytes)[src_idx];
 
         // By multiplying by [0, 256] (u32) and then dividing by 256 we achive the same result as multiplying by [0.0, 1.0] but without the repeated float multiplication
         let light_amount = (light_amount * 255.0) as u32;
 
-        self.components[dst_idx] = [
+        Self::slice_mut(&mut self.0.bytes)[dst_idx] = [
             ((r as u32 * light_amount) >> 8) as u8,
             ((g as u32 * light_amount) >> 8) as u8,
             ((b as u32 * light_amount) >> 8) as u8,
@@ -104,29 +86,15 @@ impl Bitmap {
     }
 
     pub fn width(&self) -> usize {
-        self.size[0]
+        self.0.width as usize
     }
 
     pub fn height(&self) -> usize {
-        self.size[1]
+        self.0.height as usize
     }
 
     #[cfg(not(feature = "bench"))]
-    pub fn update(&self) {
-        self.texture.update_from_bytes(
-            self.size[0] as u32,
-            self.size[1] as u32,
-            bytemuck::cast_slice(&self.components),
-        );
-    }
-}
-
-#[cfg(not(feature = "bench"))]
-impl std::ops::Deref for Bitmap {
-    type Target = Texture2D;
-
-    fn deref(&self) -> &Self::Target {
-        self.update();
-        &self.texture
+    pub fn to_texture(&self) -> Texture2D {
+        Texture2D::from_image(&self.0)
     }
 }

@@ -1,4 +1,4 @@
-use macroquad::color::*;
+use macroquad::{color::*, rand};
 
 use libcorr::bitmap::Bitmap;
 
@@ -33,9 +33,9 @@ impl Stars3D {
     }
 
     fn init_star(&mut self, index: usize) {
-        self.stars_x[index] = (rand::random::<f32>() * 2.0 - 1.0) * self.spread;
-        self.stars_y[index] = (rand::random::<f32>() * 2.0 - 1.0) * self.spread;
-        self.stars_z[index] = (rand::random::<f32>() + 0.00001) * self.spread;
+        self.stars_x[index] = rand::gen_range::<f32>(-1.0, 1.0) * self.spread;
+        self.stars_y[index] = rand::gen_range::<f32>(-1.0, 1.0) * self.spread;
+        self.stars_z[index] = rand::gen_range::<f32>(0.00001, 1.00001) * self.spread;
     }
 
     pub fn update_and_render(&mut self, target: &mut Bitmap, delta: f32) {

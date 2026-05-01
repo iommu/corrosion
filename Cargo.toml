@@ -5,8 +5,7 @@ edition = "2024"
 
 [dependencies]
 egui-macroquad = "0.17.3"
-macroquad = "0.4.14"
-rand = "0.10.1"
+macroquad = {version = "0.4.14" }
 libcorr = { path = "./libcorr" }
 
 [dev-dependencies]
@@ -23,3 +22,6 @@ bench = []
 [workspace]
 resolver = "3"
 members = ["libcorr"]
+
+# [lib]
+# crate-type = ["cdylib"]

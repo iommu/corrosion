@@ -4,11 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bytemuck = "1.25.0"
 macroquad = "0.4.14"
 derive-new = "0.7.0"
 getset = "0.1.6"
-image = "0.25.10"
 
 [features]
 bench = []

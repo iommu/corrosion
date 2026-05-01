@@ -1,18 +1,16 @@
 use std::time::Instant;
 
-use image::ImageError;
-
-use corrosion::{
+use libcorr::{
     bitmap::Bitmap,
-    camera::Camera,
     matrix::Matrix4F,
     mesh::Mesh,
     render_ctx::{clear_buffer, gen_buffer},
-    stars_3d::Stars3D,
     transform::Transform,
     vector::Vector4F,
 };
-use macroquad::color::BLACK;
+
+use corrosion::{camera::Camera, gui::DisplayTransform, stars_3d::Stars3D};
+use macroquad::{color::BLACK, prelude::ImageFormat};
 
 fn main() {
     divan::main();
@@ -29,8 +27,12 @@ fn render_scene(iterations: usize) {
         1000.0,
     ));
 
-    let texture_1 = Bitmap::new_from_file("res/bricks2.jpg").unwrap();
-    let texture_2 = Bitmap::new_from_file("res/bricks.jpg").unwrap();
+    let texture_1 =
+        Bitmap::new_from_bytes(include_bytes!("../res/bricks2.png"), Some(ImageFormat::Png))
+            .unwrap();
+    let texture_2 =
+        Bitmap::new_from_bytes(include_bytes!("../res/bricks.png"), Some(ImageFormat::Png))
+            .unwrap();
 
     let monkey_mesh = Mesh::new_from_obj_file("res/smoothMonkey0.obj").unwrap();
     let terrain_mesh = Mesh::new_from_obj_file("res/terrain2.obj").unwrap();
