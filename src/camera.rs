@@ -15,6 +15,10 @@ impl Camera {
         }
     }
 
+    pub fn projection_mut(&mut self) -> &mut Matrix4F {
+        &mut self.projection
+    }
+
     pub fn get_view_projection(&self) -> Matrix4F {
         let cam_rot = self.transform.rot().conjugate().to_rot_matrix();
         let cam_pos = *self.transform.pos() * -1.0;

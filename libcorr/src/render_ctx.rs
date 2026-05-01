@@ -5,7 +5,11 @@ use crate::{
 };
 
 pub fn gen_buffer(buffer: &Bitmap) -> Vec<f32> {
-    vec![0.0; buffer.size()[0] * buffer.size()[1]]
+    vec![f32::MAX; buffer.size()[0] * buffer.size()[1]]
+}
+
+pub fn resize_buffer(buff: &mut Vec<f32>, buffer: &Bitmap) {
+    buff.resize(buffer.size()[0] * buffer.size()[1], f32::MAX);
 }
 
 pub fn clear_buffer(z_buffer: &mut Vec<f32>) {

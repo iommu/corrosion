@@ -14,10 +14,18 @@ pub struct Bitmap(Image);
 impl Bitmap {
     pub fn new(size: [usize; 2]) -> Self {
         Self(Image {
-            bytes: vec![0u8; size[0] * size[1] * 4],
+            bytes: vec![255u8; size[0] * size[1] * 4],
             width: size[0] as u16,
             height: size[1] as u16,
         })
+    }
+
+    pub fn resize(&mut self, size: [usize; 2]) {
+        if size[0] * size[1] > (self.0.width * self.0.height) as usize {
+            self.0.bytes.resize(size[0] * size[1] * 4, 255u8);
+        }
+        self.0.width = size[0] as u16;
+        self.0.height = size[1] as u16;
     }
 
     pub fn new_from_bytes(bytes: &[u8], format: Option<ImageFormat>) -> Result<Self, Error> {

@@ -2,7 +2,7 @@ use libcorr::{
     bitmap::Bitmap,
     matrix::Matrix4F,
     mesh::Mesh,
-    render_ctx::{clear_buffer, gen_buffer},
+    render_ctx::{clear_buffer, gen_buffer, resize_buffer},
     transform::Transform,
     vector::Vector4F,
 };
@@ -12,6 +12,7 @@ use corrosion::{camera::Camera, gui::DisplayTransform, stars_3d::Stars3D};
 use macroquad::{
     color::{BLACK, WHITE},
     input::{is_key_down, mouse_wheel},
+    miniquad::window::screen_size,
     texture::draw_texture,
     time::{draw_fps, get_frame_time},
     window::next_frame,
@@ -26,10 +27,16 @@ fn main() {}
 #[cfg(not(feature = "bench"))]
 #[macroquad::main("Corrosion")]
 async fn main() {
-    let mut bitmap = Bitmap::new([screen_width() as usize, screen_height() as usize]);
+    // GUI
+
+    let mut show_fps = false;
+    let mut fov = 70.0_f32;
+
+    let mut cur_screen_size = screen_size();
+    let mut bitmap = Bitmap::new([cur_screen_size.0 as usize, cur_screen_size.1 as usize]);
     let mut z_buffer = gen_buffer(&bitmap);
     let mut camera = Camera::new(Matrix4F::new_perspective(
-        (70.0_f32).to_radians(),
+        fov.to_radians(),
         bitmap.width() as f32 / bitmap.height() as f32,
         0.1,
         1000.0,
@@ -44,10 +51,9 @@ async fn main() {
     let mut monkey_trans = DisplayTransform::from_pos(Vector4F::new(0.0, 0.0, 3.0, 1.0));
     let terrain_trans = Transform::from_pos(Vector4F::new(0.0, -1.0, 0.0, 1.0));
 
-    // GUI
-    let mut show_fps = false;
-
     loop {
+        use macroquad::miniquad::window::screen_size;
+
         camera.update(is_key_down, get_frame_time(), mouse_wheel().1);
 
         let vp = camera.get_view_projection();
@@ -84,6 +90,18 @@ async fn main() {
 
         if show_fps {
             draw_fps();
+        }
+
+        if cur_screen_size != screen_size() {
+            cur_screen_size = screen_size();
+            bitmap.resize([cur_screen_size.0 as usize, cur_screen_size.1 as usize]);
+            resize_buffer(&mut z_buffer, &bitmap);
+            *camera.projection_mut() = Matrix4F::new_perspective(
+                fov.to_radians(),
+                cur_screen_size.0.floor() / cur_screen_size.1.floor(),
+                0.1,
+                1000.0,
+            );
         }
 
         next_frame().await
