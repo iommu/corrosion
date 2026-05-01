@@ -87,3 +87,11 @@ scene            fastest       │ slowest       │ median        │ mean     
    ├─ 0          16.77 ms      │ 17.37 ms      │ 16.97 ms      │ 17.03 ms      │ 10      │ 10  
    ├─ 100        359.3 ms      │ 369.9 ms      │ 365.4 ms      │ 365.4 ms      │ 10      │ 10  
    ╰─ 500        1.744 s       │ 1.814 s       │ 1.779 s       │ 1.776 s       │ 10      │ 10
+
+## Light no longer hardcoded and now passed as ref
+Timer precision: 20 ns
+scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters
+╰─ render_scene                │               │               │               │         │
+   ├─ 0          18.12 ms      │ 19.1 ms       │ 18.19 ms      │ 18.28 ms      │ 10      │ 10
+   ├─ 100        359.3 ms      │ 376.4 ms      │ 364.4 ms      │ 366.3 ms      │ 10      │ 10
+   ╰─ 500        1.75 s        │ 1.804 s       │ 1.788 s       │ 1.783 s       │ 10      │ 10

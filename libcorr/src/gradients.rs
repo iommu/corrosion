@@ -85,7 +85,12 @@ pub struct Gradients {
 }
 
 impl Gradients {
-    pub fn new(min_y_vert: Vertex, mid_y_vert: Vertex, max_y_vert: Vertex) -> Self {
+    pub fn new(
+        min_y_vert: &Vertex,
+        mid_y_vert: &Vertex,
+        max_y_vert: &Vertex,
+        light_dir: Vector4F,
+    ) -> Self {
         let dx_inv = 1.0
             / (((mid_y_vert.x() - max_y_vert.x()) * (min_y_vert.y() - max_y_vert.y()))
                 - ((min_y_vert.x() - max_y_vert.x()) * (mid_y_vert.y() - max_y_vert.y())));
@@ -138,8 +143,6 @@ impl Gradients {
             dx_inv,
             dy_inv,
         );
-
-        let light_dir = Vector4F::new(0.0, 0.0, 1.0, 1.0);
 
         let light_amount = Gradient::new(
             [

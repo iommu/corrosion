@@ -27,6 +27,7 @@ fn main() {}
 async fn main() {
     // GUI
     let mut show_fps = false;
+    let light_dir = Vector4F::new(0.0, 0.0, 1.0, 1.0);
 
     let mut cur_screen_size = screen_size();
     let mut bitmap = Bitmap::new([cur_screen_size.0 as usize, cur_screen_size.1 as usize]);
@@ -61,6 +62,7 @@ async fn main() {
             &monkey_mesh,
             &vp,
             &monkey_trans.transformation(),
+            light_dir,
             &texture_1,
             &mut z_buffer,
         );
@@ -68,6 +70,7 @@ async fn main() {
             &terrain_mesh,
             &vp,
             &terrain_trans.transformation(),
+            light_dir,
             &texture_2,
             &mut z_buffer,
         );

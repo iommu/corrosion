@@ -18,6 +18,7 @@ fn main() {
 
 #[divan::bench(sample_count = 10, args = [0, 100, 500])]
 fn render_scene(iterations: usize) {
+    let light_dir = Vector4F::new(0.0, 0.0, 1.0, 1.0);
     let mut bitmap = Bitmap::new([800, 600]);
     let mut z_buffer = gen_buffer(&bitmap);
     let mut camera = Camera::new(Matrix4F::new_perspective(
@@ -34,8 +35,8 @@ fn render_scene(iterations: usize) {
         Bitmap::new_from_bytes(include_bytes!("../res/bricks.png"), Some(ImageFormat::Png))
             .unwrap();
 
-    let monkey_mesh = Mesh::new_from_obj_file("res/smoothMonkey0.obj").unwrap();
-    let terrain_mesh = Mesh::new_from_obj_file("res/terrain2.obj").unwrap();
+    let monkey_mesh = Mesh::new_from_obj_bytes(include_bytes!("../res/smoothMonkey0.obj")).unwrap();
+    let terrain_mesh = Mesh::new_from_obj_bytes(include_bytes!("../res/terrain2.obj")).unwrap();
 
     let monkey_trans = Transform::from_pos(Vector4F::new(0.0, 0.0, 3.0, 1.0));
     let terrain_trans = Transform::from_pos(Vector4F::new(0.0, -1.0, 0.0, 1.0));
@@ -49,6 +50,7 @@ fn render_scene(iterations: usize) {
             &monkey_mesh,
             &vp,
             &monkey_trans.transformation(),
+            light_dir,
             &texture_1,
             &mut z_buffer,
         );
@@ -56,6 +58,7 @@ fn render_scene(iterations: usize) {
             &terrain_mesh,
             &vp,
             &terrain_trans.transformation(),
+            light_dir,
             &texture_2,
             &mut z_buffer,
         );

@@ -1,7 +1,8 @@
 use std::{mem::swap, usize, vec};
 
 use crate::{
-    bitmap::Bitmap, edge::Edge, gradients::Gradients, matrix::Matrix4F, mesh::Mesh, vertex::Vertex,
+    bitmap::Bitmap, edge::Edge, gradients::Gradients, matrix::Matrix4F, mesh::Mesh,
+    vector::Vector4F, vertex::Vertex,
 };
 
 pub fn gen_buffer(buffer: &Bitmap) -> Vec<f32> {
@@ -22,6 +23,7 @@ impl Bitmap {
         mesh: &Mesh,
         view_projection: &Matrix4F,
         transform: &Matrix4F,
+        light_dir: Vector4F,
         texture: &Bitmap,
         z_buffer: &mut Vec<f32>,
     ) {
@@ -31,6 +33,7 @@ impl Bitmap {
                 &mesh.vertices()[chunk[0] as usize].transform(&mvp, transform),
                 &mesh.vertices()[chunk[1] as usize].transform(&mvp, transform),
                 &mesh.vertices()[chunk[2] as usize].transform(&mvp, transform),
+                light_dir,
                 texture,
                 z_buffer,
             );
@@ -107,14 +110,15 @@ impl Bitmap {
 
     fn scan_tri(
         &mut self,
-        min_y_vert: Vertex,
-        mid_y_vert: Vertex,
-        max_y_vert: Vertex,
+        min_y_vert: &Vertex,
+        mid_y_vert: &Vertex,
+        max_y_vert: &Vertex,
+        light_dir: Vector4F,
         handedness: bool,
         texture: &Bitmap,
         z_buffer: &mut Vec<f32>,
     ) {
-        let gradients = Gradients::new(min_y_vert, mid_y_vert, max_y_vert);
+        let gradients = Gradients::new(min_y_vert, mid_y_vert, max_y_vert, light_dir);
         let mut top_to_bot = Edge::new(&gradients, min_y_vert, max_y_vert, 0);
         let mut top_to_mid = Edge::new(&gradients, min_y_vert, mid_y_vert, 0);
         let mut mid_to_bot = Edge::new(&gradients, mid_y_vert, max_y_vert, 1);
@@ -142,6 +146,7 @@ impl Bitmap {
         vert_1: &Vertex,
         vert_2: &Vertex,
         vert_3: &Vertex,
+        light_dir: Vector4F,
         texture: &Bitmap,
         z_buffer: &mut Vec<f32>,
     ) {
@@ -150,7 +155,7 @@ impl Bitmap {
         let v_3_inside = vert_3.is_inside_view_frustum();
 
         if v_1_inside && v_2_inside && v_3_inside {
-            self.fill_tri(vert_1, vert_2, vert_3, texture, z_buffer);
+            self.fill_tri(vert_1, vert_2, vert_3, light_dir, texture, z_buffer);
             return;
         }
 
@@ -171,6 +176,7 @@ impl Bitmap {
                     &initial_vert,
                     &vertices[index],
                     &vertices[index + 1],
+                    light_dir,
                     texture,
                     z_buffer,
                 );
@@ -232,6 +238,7 @@ impl Bitmap {
         vert_1: &Vertex,
         vert_2: &Vertex,
         vert_3: &Vertex,
+        light_dir: Vector4F,
         texture: &Bitmap,
         z_buffer: &mut Vec<f32>,
     ) {
@@ -264,12 +271,7 @@ impl Bitmap {
         let handedness = if area >= 0.0 { true } else { false };
 
         self.scan_tri(
-            *min_y_vert,
-            *mid_y_vert,
-            *max_y_vert,
-            handedness,
-            texture,
-            z_buffer,
+            min_y_vert, mid_y_vert, max_y_vert, light_dir, handedness, texture, z_buffer,
         );
     }
 }
