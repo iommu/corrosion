@@ -2,6 +2,7 @@ use std::time::Instant;
 
 use libcorr::{
     bitmap::Bitmap,
+    lightsource::LightSource,
     matrix::Matrix4F,
     mesh::Mesh,
     render_ctx::{clear_buffer, gen_buffer},
@@ -18,7 +19,7 @@ fn main() {
 
 #[divan::bench(sample_count = 10, args = [0, 100, 500])]
 fn render_scene(iterations: usize) {
-    let light_dir = Vector4F::new(0.0, 0.0, 1.0, 1.0);
+    let light = LightSource::new(Vector4F::new(0.0, 0.0, 1.0, 1.0), [255, 255, 255, 255]);
     let mut bitmap = Bitmap::new([800, 600]);
     let mut z_buffer = gen_buffer(&bitmap);
     let mut camera = Camera::new(Matrix4F::new_perspective(
@@ -50,7 +51,7 @@ fn render_scene(iterations: usize) {
             &monkey_mesh,
             &vp,
             &monkey_trans.transformation(),
-            light_dir,
+            &light,
             &texture_1,
             &mut z_buffer,
         );
@@ -58,7 +59,7 @@ fn render_scene(iterations: usize) {
             &terrain_mesh,
             &vp,
             &terrain_trans.transformation(),
-            light_dir,
+            &light,
             &texture_2,
             &mut z_buffer,
         );

@@ -76,20 +76,17 @@ impl Bitmap {
         x_src: usize,
         y_src: usize,
         bitmap: &Bitmap,
-        light_amount: f32,
+        light: [u32; 4],
     ) {
         let src_idx = y_src * bitmap.0.width as usize + x_src;
         let dst_idx = y_dest * self.0.width as usize + x_dest;
         let [r, g, b, a] = Self::slice(&bitmap.0.bytes)[src_idx];
 
-        // By multiplying by [0, 256] (u32) and then dividing by 256 we achive the same result as multiplying by [0.0, 1.0] but without the repeated float multiplication
-        let light_amount = (light_amount * 256.0) as u32;
-
         // min(65280) (255 * 256) we can allow for lights greater than 1.0 for a blown out look
         Self::slice_mut(&mut self.0.bytes)[dst_idx] = [
-            ((r as u32 * light_amount).min(65280) >> 8) as u8,
-            ((g as u32 * light_amount).min(65280) >> 8) as u8,
-            ((b as u32 * light_amount).min(65280) >> 8) as u8,
+            ((r as u32 * light[0]).min(65280) >> 8) as u8,
+            ((g as u32 * light[1]).min(65280) >> 8) as u8,
+            ((b as u32 * light[2]).min(65280) >> 8) as u8,
             a,
         ];
     }

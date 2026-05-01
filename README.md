@@ -89,9 +89,18 @@ scene            fastest       │ slowest       │ median        │ mean     
    ╰─ 500        1.744 s       │ 1.814 s       │ 1.779 s       │ 1.776 s       │ 10      │ 10
 
 ## Light no longer hardcoded and now passed as ref
-Timer precision: 20 ns
-scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters
-╰─ render_scene                │               │               │               │         │
-   ├─ 0          18.12 ms      │ 19.1 ms       │ 18.19 ms      │ 18.28 ms      │ 10      │ 10
-   ├─ 100        359.3 ms      │ 376.4 ms      │ 364.4 ms      │ 366.3 ms      │ 10      │ 10
-   ╰─ 500        1.75 s        │ 1.804 s       │ 1.788 s       │ 1.783 s       │ 10      │ 10
+Timer precision: 20 ns  
+scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters  
+╰─ render_scene                │               │               │               │         │  
+   ├─ 0          18.12 ms      │ 19.1 ms       │ 18.19 ms      │ 18.28 ms      │ 10      │ 10  
+   ├─ 100        359.3 ms      │ 376.4 ms      │ 364.4 ms      │ 366.3 ms      │ 10      │ 10  
+   ╰─ 500        1.75 s        │ 1.804 s       │ 1.788 s       │ 1.783 s       │ 10      │ 10  
+
+## Colored light source support
+
+Timer precision: 60 ns  
+scene            fastest       │ slowest       │ median        │ mean          │ samples │ iters  
+╰─ render_scene                │               │               │               │         │  
+   ├─ 0          18.63 ms      │ 19.38 ms      │ 18.72 ms      │ 18.83 ms      │ 10      │ 10  
+   ├─ 100        383.1 ms      │ 417.3 ms      │ 397.8 ms      │ 398.3 ms      │ 10      │ 10  
+   ╰─ 500        1.843 s       │ 1.951 s       │ 1.881 s       │ 1.887 s       │ 10      │ 10

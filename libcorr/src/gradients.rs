@@ -1,6 +1,6 @@
 use std::ops::Index;
 
-use crate::{vector::Vector4F, vertex::Vertex};
+use crate::{lightsource::LightSource, vector::Vector4F, vertex::Vertex};
 
 use getset::Getters;
 
@@ -89,7 +89,7 @@ impl Gradients {
         min_y_vert: &Vertex,
         mid_y_vert: &Vertex,
         max_y_vert: &Vertex,
-        light_dir: Vector4F,
+        light: &LightSource,
     ) -> Self {
         let dx_inv = 1.0
             / (((mid_y_vert.x() - max_y_vert.x()) * (min_y_vert.y() - max_y_vert.y()))
@@ -146,9 +146,9 @@ impl Gradients {
 
         let light_amount = Gradient::new(
             [
-                saturate(min_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
-                saturate(mid_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
-                saturate(max_y_vert.normal().dot(light_dir)) * 0.9 + 0.1,
+                saturate(min_y_vert.normal().dot(*light.direction())) * 0.9 + 0.1,
+                saturate(mid_y_vert.normal().dot(*light.direction())) * 0.9 + 0.1,
+                saturate(max_y_vert.normal().dot(*light.direction())) * 0.9 + 0.1,
             ],
             &min_y_vert,
             &mid_y_vert,
