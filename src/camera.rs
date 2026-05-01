@@ -15,8 +15,8 @@ impl Camera {
         }
     }
 
-    pub fn projection_mut(&mut self) -> &mut Matrix4F {
-        &mut self.projection
+    pub fn reproject(&mut self, fov: f32, aspect_ratio: f32, z_near: f32, z_far: f32) {
+        self.projection = Matrix4F::new_perspective(fov, aspect_ratio, z_near, z_far);
     }
 
     pub fn get_view_projection(&self) -> Matrix4F {
@@ -27,7 +27,7 @@ impl Camera {
         self.projection * (cam_rot * cam_trans)
     }
 
-    pub fn update<F>(&mut self, mut is_key_down: F, delta: f32, scroll: f32)
+    pub fn process_keys<F>(&mut self, mut is_key_down: F, delta: f32, scroll: f32)
     where
         F: FnMut(KeyCode) -> bool,
     {

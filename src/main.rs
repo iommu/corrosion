@@ -1,13 +1,12 @@
 use libcorr::{
     bitmap::Bitmap,
-    matrix::Matrix4F,
     mesh::Mesh,
     render_ctx::{clear_buffer, gen_buffer, resize_buffer},
     transform::Transform,
     vector::Vector4F,
 };
 
-use corrosion::{camera::Camera, gui::DisplayTransform, stars_3d::Stars3D};
+use corrosion::gui::{DisplayCamera, DisplayTransform};
 
 use macroquad::{
     color::{BLACK, WHITE},
@@ -16,7 +15,6 @@ use macroquad::{
     texture::draw_texture,
     time::{draw_fps, get_frame_time},
     window::next_frame,
-    window::{screen_height, screen_width},
 };
 
 use egui_macroquad::egui;
@@ -28,19 +26,17 @@ fn main() {}
 #[macroquad::main("Corrosion")]
 async fn main() {
     // GUI
-
     let mut show_fps = false;
-    let mut fov = 70.0_f32;
 
     let mut cur_screen_size = screen_size();
     let mut bitmap = Bitmap::new([cur_screen_size.0 as usize, cur_screen_size.1 as usize]);
     let mut z_buffer = gen_buffer(&bitmap);
-    let mut camera = Camera::new(Matrix4F::new_perspective(
-        fov.to_radians(),
+    let mut camera = DisplayCamera::new(
+        70.0,
         bitmap.width() as f32 / bitmap.height() as f32,
         0.1,
         1000.0,
-    ));
+    );
 
     let texture_1 = Bitmap::new_from_bytes(include_bytes!("../res/bricks2.png"), None).unwrap();
     let texture_2 = Bitmap::new_from_bytes(include_bytes!("../res/bricks.png"), None).unwrap();
@@ -54,7 +50,7 @@ async fn main() {
     loop {
         use macroquad::miniquad::window::screen_size;
 
-        camera.update(is_key_down, get_frame_time(), mouse_wheel().1);
+        camera.process_keys(is_key_down, get_frame_time(), mouse_wheel().1);
 
         let vp = camera.get_view_projection();
 
@@ -83,6 +79,7 @@ async fn main() {
                 ui.label("Test");
                 monkey_trans.ui(ui, "Monkey");
                 ui.checkbox(&mut show_fps, "Show FPS");
+                camera.ui(ui);
             });
         });
 
@@ -96,12 +93,8 @@ async fn main() {
             cur_screen_size = screen_size();
             bitmap.resize([cur_screen_size.0 as usize, cur_screen_size.1 as usize]);
             resize_buffer(&mut z_buffer, &bitmap);
-            *camera.projection_mut() = Matrix4F::new_perspective(
-                fov.to_radians(),
-                cur_screen_size.0.floor() / cur_screen_size.1.floor(),
-                0.1,
-                1000.0,
-            );
+            camera.aspect_ratio = cur_screen_size.0.floor() / cur_screen_size.1.floor();
+            camera.reproject();
         }
 
         next_frame().await
