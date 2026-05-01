@@ -35,12 +35,14 @@ impl Camera {
         let sens_x = 2.66 * delta;
         let sens_y = 2.0 * delta;
         let move_amount = 5.0 * delta;
+        let scroll = if scroll == 0.0 { 0.0 } else { scroll.signum() };
 
         // Similarly, input keys are hardcoded here.
         // As before, in a more general system, you might want to have these as variables.
+        //
         let forward = ((is_key_down(KeyCode::W) as i8 - is_key_down(KeyCode::S) as i8) as f32
             * move_amount)
-            + (scroll * move_amount * 5.0);
+            + (scroll * 3.0);
         let left =
             (is_key_down(KeyCode::A) as i8 - is_key_down(KeyCode::D) as i8) as f32 * move_amount;
         let up = (is_key_down(KeyCode::Space) as i8 - is_key_down(KeyCode::LeftShift) as i8) as f32
