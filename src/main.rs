@@ -6,7 +6,7 @@ use libcorr::{
     vector::Vector4F,
 };
 
-use corrosion::gui::{DisplayCamera, DisplayTransform};
+use corrosion::gui::{DisplayCamera, DisplayLightSource, DisplayTransform};
 
 use macroquad::{
     color::{BLACK, WHITE},
@@ -26,10 +26,9 @@ fn main() {}
 #[macroquad::main("Corrosion")]
 async fn main() {
     // GUI
-
-    use libcorr::lightsource::LightSource;
     let mut show_fps = false;
-    let mut light = LightSource::new(Vector4F::new(0.0, 0.0, 1.0, 1.0), [255, 255, 255, 255]);
+    let mut light =
+        DisplayLightSource::new(Vector4F::new(0.0, 0.0, 1.0, 1.0), [255, 255, 255, 255], 128);
 
     let mut cur_screen_size = screen_size();
     let mut bitmap = Bitmap::new([cur_screen_size.0 as usize, cur_screen_size.1 as usize]);
@@ -85,6 +84,7 @@ async fn main() {
                 monkey_trans.ui(ui, "Monkey");
                 ui.checkbox(&mut show_fps, "Show FPS");
                 camera.ui(ui);
+                light.ui(ui);
             });
         });
 

@@ -75,8 +75,8 @@ impl Bitmap {
                 let y_src = ((tex_coord_y * z) * (texture.size()[1] - 1) as f32 + 0.5) as usize;
 
                 // By multiplying by [0, 256] (u32) and then dividing by 256 we achive the same result as multiplying by [0.0, 1.0] but without the repeated float multiplication
-                let light_amount = (light_amount * 256.0) as u32;
-                let light: [u32; 4] = light.color().map(|frac| (frac * light_amount) >> 8);
+                let light_amount = (light_amount * (light.intensity() as u16 * 2) as f32) as u32;
+                let light: [u32; 4] = light.color().map(|frac| (frac as u32 * light_amount) >> 8);
                 self.copy_pixel(x as usize, y, x_src, y_src, texture, light);
             }
 
